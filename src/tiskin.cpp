@@ -15,7 +15,7 @@ using namespace std;
 int main (int argn, char **argv) {
 	cout << "Hello user!\n";
 
-	//Bsp<int> bsp;
+	BSP<int> BSP;
 
 	return 0;
 }

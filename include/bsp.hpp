@@ -8,28 +8,38 @@
 #ifndef BSP_HPP
 #define BSP_HPP
 
-#include <concurrentQueue.hpp>
+#include <workerThread.hpp>
+#include <superstep.hpp>
+#include <uTimer.hpp>
 
-#include <thread>
 #include <vector>
 
 
 
 template <typename T>
-class Bsp {
-private :
-	std::vector<std::thread> workers;
-	std::thread masterThread;
+class BSP {
+private:
+	std::vector<WorkerThread> workers;
+	std::vector<Superstep> supersteps;
 
-public :
-	Bsp (int wNumber) {
+
+public:
+	BSP (int wNumber = 0) {
+		if (wNumber < 0)
+			throw std::invalid_argument ("Number of worker must be greater or equal to 0");
+
+		workers.reserve (wNumber);
 	}
 
 
-	~Bsp () {
+	~BSP () {
 	}
 
-	//void addStep (...);
+
+	//void addSuperStep (std::shared_ptr<Superstep> sstep);
+
+
+	//void runAndWait (<first communication array>);
 };
 
 
