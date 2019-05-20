@@ -20,6 +20,17 @@ WorkerThread::WorkerThread () {
 
 
 
+WorkerThread::WorkerThread (WorkerThread&& wt) {
+	stopMe			= false;
+	task			= wt.task;
+	workerThread	= std::thread ([&] {
+		workerFunction ();
+	});
+}
+
+
+
+
 WorkerThread::~WorkerThread () {
 	stopWorker ();
 

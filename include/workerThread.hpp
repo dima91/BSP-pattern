@@ -8,7 +8,6 @@
 #ifndef WORKER_THREAD_HPP
 #define WORKER_THREAD_HPP
 
-#include <concurrentQueue.hpp>
 #include <barrier.hpp>
 
 #include <thread>
@@ -42,6 +41,7 @@ private:
 
 public:
 	WorkerThread	();
+	WorkerThread	(WorkerThread &&);
 	~WorkerThread	();
 
 	void assignActivity		(std::shared_ptr<Task> a);
