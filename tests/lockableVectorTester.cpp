@@ -15,35 +15,35 @@ int main (int argn, char **argv) {
 
 	auto handle0 = async (launch::async, [&locV]() {
 		cout << "[0] Locking\n";
-		std::vector<int> &lockedV	= locV.lockAndGet ();
+		auto locked	= locV.lockAndGet ();
 		cout << "[0] Locked\n";
-		lockedV.push_back (10);
-		lockedV.push_back (20);
+		locked->data.push_back (10);
+		locked->data.push_back (20);
 		this_thread::sleep_for (chrono::milliseconds (2000));
 		cout << "[0] Unlocking\n";
-		locV.releaseVector ();
+		locked.reset();
 		cout << "[0] Unlocked\n";
+		cout << "[0] Exiting\n";
 	});
 	
 	
 	auto handle1 = async (launch::async, [&locV]() {
 		this_thread::sleep_for (chrono::milliseconds (10));
 		cout << "[1] Locking\n";
-		std::vector<int> &lockedV	= locV.lockAndGet ();
+		auto locked	= locV.lockAndGet ();
 		cout << "[1] Locked\n";
-		int zero	= std::move (lockedV[0]);
-		int uno		= std::move (lockedV[1]);
-		lockedV.erase (lockedV.begin());
-		cout << "zero:  " << zero << " --" << lockedV[0] << "--\n";
-		cout << "uno:   " << uno  << " --" << lockedV[1] << "--\n";
-		cout << "size:  " << lockedV.size () << endl;
-		lockedV.erase (lockedV.begin());
-		cout << "size:  " << lockedV.size () << endl;
-		std::for_each (lockedV.begin(), lockedV.end(), [] (int i) {
+		int zero	= std::move (locked->data[0]);
+		int uno		= std::move (locked->data[1]);
+		locked->data.erase (locked->data.begin());
+		cout << "zero:  " << zero << " --" << locked->data[0] << "--\n";
+		cout << "uno:   " << uno  << " --" << locked->data[1] << "--\n";
+		cout << "size:  " << locked->data.size () << endl;
+		locked->data.erase (locked->data.begin());
+		cout << "size:  " << locked->data.size () << endl;
+		std::for_each (locked->data.begin(), locked->data.end(), [] (int i) {
 			cout << "--> " << i << endl;
 		});
 		cout << "[1] Unlocking\n";
-		locV.releaseVector ();
 		cout << "[1] Unlocked\n";
 	});
 

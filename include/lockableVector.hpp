@@ -12,14 +12,38 @@
 #include <mutex>
 #include <condition_variable>
 
+// Forward class declaration
+template<typename T>
+class LockableVector;
+
+
+
+template<typename T>
+class LockedVector {
+private :
+	LockableVector<T>& parent;
+public :
+	std::vector<T>& data;
+	LockedVector (std::vector<T>& origVect, LockableVector<T> *locker) : parent (*locker), data (origVect) {}
+	~LockedVector () {
+		parent.releaseVector ();
+	}
+};
+
+
 
 
 template <typename T>
 class LockableVector {
 private:
+	friend class LockedVector<T>;
 	std::vector<T> dataVector;
 	std::mutex vectorMutex;
 	std::condition_variable vectorCV;
+
+	void releaseVector () {
+		vectorMutex.unlock ();
+	}
 
 	
 public:
@@ -45,14 +69,9 @@ public:
 	}
 
 
-	std::vector<T>& lockAndGet () {
+	std::unique_ptr<LockedVector<T>> lockAndGet () {
 		vectorMutex.lock ();
-		return dataVector;
-	}
-
-
-	void releaseVector () {
-		vectorMutex.unlock ();
+		return std::unique_ptr<LockedVector<T>> (new LockedVector<T> (dataVector, this));
 	}
 };
 
