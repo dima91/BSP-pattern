@@ -22,6 +22,10 @@ ${OBJ_DIR}/barrier.o : src/barrier.cpp include/barrier.hpp
 	${CC} -c -o $@ $< ${CFLAGS}
 
 
+${OBJ_DIR}/workerThread.o : src/workerThread.cpp include/workerThread.hpp
+	${CC} -c -o $@ $< ${CFLAGS}
+
+
 
 ###########
 ## TESTS ##
@@ -34,8 +38,8 @@ ${BIN_DIR}/BarrierTester : tests/barrierTester.cpp ${OBJ_DIR}/barrier.o
 	${CC} $< ${CFLAGS} -o $@ ${OBJ_DIR}/barrier.o
 
 
-${BIN_DIR}/WorkerTester : tests/workerTester.cpp include/workerThread.hpp include/barrier.hpp
-	${CC} -o $@ $< ${CFLAGS} ${OBJ_DIR}/barrier.o
+${BIN_DIR}/WorkerTester : tests/workerTester.cpp ${OBJ_DIR}/workerThread.o ${OBJ_DIR}/barrier.o
+	${CC} -o $@ $< ${CFLAGS} ${OBJ_DIR}/barrier.o ${OBJ_DIR}/workerThread.o
 
 
 clean :
