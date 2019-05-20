@@ -74,8 +74,6 @@ void WorkerThread::assignActivity (std::shared_ptr<Task> a) {
 	task	= std::move(a);
 
 	taskCV.notify_all ();
-
-	std::cout << "Assigned\n" << std::endl;
 }
 
 

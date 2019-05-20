@@ -16,7 +16,6 @@
 #include <future>
 #include <atomic>
 #include <memory>
-#include <iostream>		// TODO Remove me after tests
 
 
 
