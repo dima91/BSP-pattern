@@ -3,7 +3,14 @@
 BIN_DIR	= bin
 OBJ_DIR	= obj
 CC		= g++
-CFLAGS	= -I include -lpthread -Wall -pedantic -O3
+CFLAGS	= -I include -lpthread -Wall -pedantic -O3 -std=c++11
+TESTS	= ${BIN_DIR}/QueueTester ${BIN_DIR}/BarrierTester ${BIN_DIR}/WorkerTester ${BIN_DIR}/Tiskin
+
+all :
+	-mkdir ${BIN_DIR}
+	-mkdir ${OBJ_DIR}
+	make ${TESTS}
+
 
 
 
@@ -33,3 +40,4 @@ ${BIN_DIR}/WorkerTester : tests/workerTester.cpp include/workerThread.hpp includ
 
 clean :
 	-rm -fr ${BIN_DIR}
+	-rm -fr ${OBJ_DIR}

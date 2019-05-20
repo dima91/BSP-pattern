@@ -20,7 +20,7 @@ template <typename T>
 class BSP {
 private:
 	std::vector<WorkerThread> workers;
-	std::vector<Superstep> supersteps;
+	std::vector<Superstep<T>> supersteps;
 
 
 public:
@@ -39,7 +39,7 @@ public:
 	//void addSuperStep (std::shared_ptr<Superstep> sstep);
 
 
-	//void runAndWait (<first communication array>);
+	//void runAndWait (std::vector<std::vector<T>> firstInput, std::vector<std::vector<T>> &ouput);
 };
 
 

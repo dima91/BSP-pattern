@@ -15,7 +15,8 @@ using namespace std;
 int main (int argn, char **argv) {
 	cout << "Hello user!\n";
 
-	BSP<int> BSP;
+	// Template type T could be both std::vector<int> and std::vector<std::shared_ptr<int>>
+	//BSP<std::vector<shared_ptr<int>>> bspPattern;
 
 	return 0;
 }
