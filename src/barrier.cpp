@@ -40,7 +40,7 @@ void Barrier::decreaseBarrier () {
 
 void Barrier::reset (int activitiesNumber) {
 	if (this->activitiesNumber != 0)
-		throw std::runtime_error ("ACtivities number differs from 0!");
+		throw std::runtime_error ("Activities number differs from 0!");
 	
 	std::unique_lock<std::mutex> lock (barrierMutex);
 	this->activitiesNumber	= activitiesNumber;
