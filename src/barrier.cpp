@@ -46,3 +46,11 @@ void Barrier::reset (int activitiesNumber) {
 	this->activitiesNumber	= activitiesNumber;
 	barrierCV.notify_all ();
 }
+
+
+
+
+void Barrier::waitForFinish () {
+	std::unique_lock<std::mutex> lock (barrierMutex);
+	barrierCV.wait (lock, [&] {return activitiesNumber == 0;});
+}
