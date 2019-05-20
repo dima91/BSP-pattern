@@ -4,7 +4,7 @@ BIN_DIR	= bin
 OBJ_DIR	= obj
 CC		= g++
 CFLAGS	= -I include -lpthread -Wall -pedantic -O3 -std=c++11
-TESTS	= ${BIN_DIR}/QueueTester ${BIN_DIR}/BarrierTester ${BIN_DIR}/WorkerTester ${BIN_DIR}/Tiskin
+TESTS	= ${BIN_DIR}/QueueTester ${BIN_DIR}/BarrierTester ${BIN_DIR}/WorkerTester ${BIN_DIR}/Tiskin ${BIN_DIR}/SuperstepTester
 
 all :
 	-mkdir ${BIN_DIR}
@@ -35,11 +35,15 @@ ${BIN_DIR}/QueueTester : tests/queueTester.cpp include/concurrentQueue.hpp
 
 
 ${BIN_DIR}/BarrierTester : tests/barrierTester.cpp ${OBJ_DIR}/barrier.o
-	${CC} $< ${CFLAGS} -o $@ ${OBJ_DIR}/barrier.o
+	${CC} $< -o $@ ${CFLAGS} ${OBJ_DIR}/barrier.o
 
 
 ${BIN_DIR}/WorkerTester : tests/workerTester.cpp ${OBJ_DIR}/workerThread.o ${OBJ_DIR}/barrier.o
-	${CC} -o $@ $< ${CFLAGS} ${OBJ_DIR}/barrier.o ${OBJ_DIR}/workerThread.o
+	${CC} $< -o $@ ${CFLAGS} ${OBJ_DIR}/barrier.o ${OBJ_DIR}/workerThread.o
+
+
+${BIN_DIR}/SuperstepTester : tests/superstepTester.cpp include/superstep.hpp ${OBJ_DIR}/workerThread.o ${OBJ_DIR}/barrier.o
+	${CC} $< -o $@ ${OBJ_DIR}/workerThread.o ${CFLAGS} ${OBJ_DIR}/barrier.o
 
 
 clean :

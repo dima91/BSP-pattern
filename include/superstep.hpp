@@ -8,6 +8,7 @@
 #ifndef SUPERSTEP_HPP
 #define SUPERSTEP_HPP
 
+#include <concurrentQueue.hpp>
 #include <workerThread.hpp>
 #include <barrier.hpp>
 
@@ -20,28 +21,83 @@ public:
 	 * It requires the type T input of the activity and returns a vector of integers, on which the i-th position of
 	 * vector contains the index of target activity for input element i
 	 */
-	using CommunicationProtocol	= std::vector<int>;
+	using CommunicationProtocol	= std::vector<std::vector<int>>;
 
 	// Defines the type of a general activity
-	using ActivityFunction		= std::function<T& (T&)>;
+	using ActivityFunction		= std::function<std::vector<T> (std::vector<T>&)>;
 
 
 private:
+	ActivityFunction activityFunction;
+	int parallelismDegree;
+	CommunicationProtocol commProto;
+	Barrier barrier;
+
+	void activityTask (std::vector<T> inputItems);
 
 
 public:
-	Superstep (/*activityFunction, parallelItems, communicationProtocol*/);
+	Superstep (ActivityFunction fun, int parDegree, CommunicationProtocol proto);
 	~Superstep ();
 
 	/* Method to execute this current superstep. It requries thread of workers on which the activity will be run,
 	 * 
 	 */
-	/*std::future<int> runStep (std::vector<std::thread> &workers,
-								std::concurrentQueue<std::vector<T>> input,
-								std::ConcurrentQueue<std::vector<T>> output);*/
+	int runStep (std::vector<WorkerThread> &workers,
+					std::vector<ConcurrentQueue<T>> input,
+					std::vector<ConcurrentQueue<T>> output);
 
-	//int getActivitiesNumber ();
+	int getActivitiesNumber ();
 };
+
+
+
+
+/* ==========  ==========  ==========  ==========  ========== */
+/* ==========  ==========  ==========  ==========  ========== */
+
+
+
+
+template<typename T>
+Superstep<T>::Superstep (ActivityFunction fun, int parDegree, CommunicationProtocol proto) : barrier(parDegree) {
+	activityFunction	= fun;
+	parallelismDegree	= parDegree;
+	commProto			= proto;
+}
+
+
+
+template<typename T>
+Superstep<T>::~Superstep () {
+	// TODO
+}
+
+
+
+
+template<typename T>
+void Superstep<T>::activityTask (std::vector<T> inputItems) {
+	// Computation phase
+	activityFunction (inputItems);
+
+
+}
+
+
+
+
+template<typename T>
+int Superstep<T>::runStep (std::vector<WorkerThread> &workers,
+							std::vector<ConcurrentQueue<T>> input,
+							std::vector<ConcurrentQueue<T>> output) {
+	// TODO
+	
+	// Setting up communication phase
+	barrier.reset (parallelismDegree);
+
+	return -1;
+}
 
 
 #endif // SUPERSTEP_HPP
