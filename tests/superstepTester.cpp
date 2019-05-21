@@ -11,10 +11,9 @@ using namespace std;
 
 
 void s0Function (std::vector<int>& v) {
-	for_each (v.begin(), v.end(), [] (int i) {
-		cout << "-->  " << i << endl;
-	});
-	
+	for (size_t i=0; i<v.size(); i++) {
+		v[i] *= v[i];
+	}
 	return ;
 }
 
@@ -32,7 +31,21 @@ int main (int argn, char **argv) {
 	std::vector<LockableVector<int>> lockableVectors (parDeg);
 
 	std::vector<std::vector<int>> comProto (parDeg);
-	Superstep<int> s0 (s0Function, parDeg, comProto);
+	Superstep<int> s0;
+
+	for (int i=0; i<parDeg; i++) {
+		Superstep<int>::ActivityFunction a	= std::function<void (std::vector<int>&)> ([] (std::vector<int> &inputs) {
+			for (size_t i=0; i<inputs.size(); i++) {
+				inputs[i] *= inputs[i];
+			}
+			return ;
+		});
+		auto comFun	= std::function<Superstep<int>::CommunicationProtocol (std::vector<int> &)> ([comProto] (std::vector<int> els) {
+			return comProto;
+		});
+		//s0.addActivity (a, comFun);
+		s0.addActivity (a, comProto);
+	}
 
 	if (parDeg>0) {
 		lockableVectors[0].getVector().push_back (2);
@@ -56,6 +69,12 @@ int main (int argn, char **argv) {
 
 	s0.runStep (workers, lockableVectors);
 	std::for_each (workers.begin(), workers.end(), [] (WorkerThread& wt) {wt.stopWorker();});
+
+	for (size_t i=0; i<lockableVectors.size(); i++) {
+		for (auto el : lockableVectors[i].getVector())
+			cout << el << ", ";
+		std::cout << endl;
+	}
 
 
 

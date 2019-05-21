@@ -30,16 +30,22 @@ public:
 
 
 private:
-	ActivityFunction activityFunction;	// Holds the activity submitted by the user
-	int parallelismDegree;				// Holds the number of parallel activities for this superstep
-	CommunicationProtocol commProto;	// Definses the communication protocol executed at the end of computation phase
-	Barrier workersBarrier;				// Allows to activities to wait for other activities' end of computation/communication
-	Barrier startBarrier;				// TODO
+	// Holds the activity submitted by the user
+	std::vector<std::pair<ActivityFunction, std::function<CommunicationProtocol (std::vector<T>&)>>> activitiesFunctions;
+	Barrier startBarrier;
+	Barrier compPhaseBarrier;
+	Barrier commPhaseBarrier;
+
+	// Function executed by a generic WorkerThread
+	void workerFunction (int index, std::vector<LockableVector<T>> &dataVectors);
 
 
 public:
-	Superstep (ActivityFunction fun, int parDegree, CommunicationProtocol proto);
+	Superstep ();
 	~Superstep ();
+
+	int addActivity (ActivityFunction fun, CommunicationProtocol protocol);
+	int addActivity (ActivityFunction fun, std::function<CommunicationProtocol (std::vector<T>&)> protocol);
 
 	/* Method to execute this current superstep. It requries a vector of workers on which the activity will be run,
 	 * a vector containing ConcurentQueues which hold input elements for that worker and a vector in which will be
@@ -61,18 +67,40 @@ public:
 
 
 template<typename T>
-Superstep<T>::Superstep (ActivityFunction fun, int parDegree, CommunicationProtocol proto) :
-workersBarrier(0), startBarrier (0) {
-	activityFunction	= fun;
-	parallelismDegree	= parDegree;
-	commProto			= proto;
-}
+Superstep<T>::Superstep () : startBarrier (0), compPhaseBarrier(0), commPhaseBarrier(0) {}
 
 
 
 template<typename T>
-Superstep<T>::~Superstep () {
+Superstep<T>::~Superstep () {}
+
+
+
+
+template<typename T>
+int Superstep<T>::addActivity (ActivityFunction fun, CommunicationProtocol protocol) {
 	// TODO
+	auto protoFun	= std::function<Superstep<T>::CommunicationProtocol (std::vector<int> &)> ([protocol] (std::vector<int> els) {
+							return protocol;
+						});
+	auto element	= std::make_pair<ActivityFunction, std::function<CommunicationProtocol (std::vector<T>&)>>
+						(std::move(fun), std::move(protoFun));
+	activitiesFunctions.push_back (std::move(element));
+
+	return activitiesFunctions.size()-1;
+}
+
+
+
+
+template<typename T>
+int Superstep<T>::addActivity (ActivityFunction fun, std::function<CommunicationProtocol (std::vector<T>&)> protocol) {
+	// TODO
+	auto element	= std::make_pair<ActivityFunction, std::function<CommunicationProtocol (std::vector<T>&)>>
+						(std::move(fun), std::move(protocol));
+	activitiesFunctions.push_back (std::move(element));
+	
+	return activitiesFunctions.size()-1;
 }
 
 
@@ -82,57 +110,59 @@ template<typename T>
 int Superstep<T>::runStep (std::vector<WorkerThread> &workers,
 							std::vector<LockableVector<T>> &dataVectors) {
 
-	// TODO Defining worker function
-	auto computationFunction	= std::function<void (std::vector<T>&)> ([&] (std::vector<T>& inputItems) {
-		startBarrier.waitForFinish ();
-		activityFunction (inputItems);
-		workersBarrier.decreaseBarrier ();
-	});
-
-
-	// TODO CommunicationFunction
-	auto communicationFunction	= std::function<void (std::vector<LockableVector<T>>&, std::vector<int> &)>
-									([&] (std::vector<LockableVector<T>>& inputVectors, std::vector<int> &commProto) {
-		startBarrier.waitForFinish ();
-		std::this_thread::sleep_for (std::chrono::milliseconds (1000));
-		workersBarrier.decreaseBarrier ();
-		std::cout << "Exiting from communicationFunction..\n";
-	});
-
-
-
-	// ============================
-	// Setting up computation phase
-	if (workers.size () < (size_t) parallelismDegree) {
-		throw std::runtime_error ("Mismatching number of workers vector and parallelism degree! (#workers < parallelism degree)");
+	if (workers.size () < activitiesFunctions.size()) {
+		throw std::runtime_error ("Mismatching between number of workers and number of activities! (#workers < #activities)");
 	}
 
-	workersBarrier.reset (parallelismDegree);
-	startBarrier.reset (1);	
-	for (int i=0; i<parallelismDegree; i++) {
+	// Resetting bariers
+	commPhaseBarrier.reset (activitiesFunctions.size());
+	compPhaseBarrier.reset (activitiesFunctions.size());
+	startBarrier.reset (1);
+
+
+	// Setting up worker threads
+	std::cout << "size: " << activitiesFunctions.size() << std::endl;;
+	for (size_t i=0; i<activitiesFunctions.size(); i++) {
+
 		// Bind packaged task to arguments
-		auto boundFunction	= std::bind (computationFunction, dataVectors[i].getVector ());
-		auto packagedTask	= std::packaged_task<void()> (boundFunction);
+		auto lambdaFunction	= [&] (int index, std::vector<LockableVector<T>> &inputItems) {
+			workerFunction (index, inputItems);
+		};
+		auto boundedFunction	= std::bind (lambdaFunction, i, std::ref(dataVectors));
+		auto packagedTask	= std::packaged_task<void()> (boundedFunction);
 
 		// Assign created packaged_task to a worker
 		workers[i].assignActivity (std::move(packagedTask));
 	}
 
-
-	// ================================
-	// Waiting for workers completion
-	std::cout << "Decreasing startBarrier and waiting for workers' end..\n";
+	// Starting workers and waiting for their completion
 	startBarrier.decreaseBarrier ();
-	workersBarrier.waitForFinish ();
-	std::cout << "Workers finished\n";
-
-
-	// ==============================
-	// Setting up communication phase
-	/*startBarrier.reset (1);
-	workersBarrier.reset (parallelismDegree);*/
+	commPhaseBarrier.waitForFinish ();
 
 	return -1;
+}
+
+
+
+
+template<typename T>
+void Superstep<T>::workerFunction (int index, std::vector<LockableVector<T>> &inputItems) {
+	startBarrier.waitForFinish ();
+
+	// ============================
+	// Performing computation phase
+	activitiesFunctions[index].first (inputItems[index].getVector());
+	compPhaseBarrier.decreaseBarrier ();
+
+	std::cout << "End of computation phase\n";
+
+	// ==============================
+	// Performing communication phase
+	// TODO
+	CommunicationProtocol protocol	= activitiesFunctions[index].second (inputItems[index].getVector());
+	/*std::this_thread::sleep_for (std::chrono::milliseconds (1000));		// Simulating communication phase*/
+	commPhaseBarrier.decreaseBarrier ();
+	std::cout << "Exiting from workerFunction\n";
 }
 
 
