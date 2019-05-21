@@ -85,19 +85,21 @@ int Superstep<T>::runStep (std::vector<WorkerThread> &workers,
 	// TODO Defining worker function
 	auto computationFunction	= std::function<void (std::vector<T>&)> ([&] (std::vector<T>& inputItems) {
 		startBarrier.waitForFinish ();
-		std::cout << "Running activityFunction\n";
 		activityFunction (inputItems);
 		workersBarrier.decreaseBarrier ();
-		//std::cout << "exiting from computationFunction  " << workersBarrier.getRemainingEntities() << std::endl;
 	});
 
+
 	// TODO CommunicationFunction
-	/*auto communicationFunction	= std::function<void (std::vector<LockableVector<T>>&)>
-									([&] (std::vector<LockableVector<T>>& inputItems) {
+	auto communicationFunction	= std::function<void (std::vector<LockableVector<T>>&, std::vector<int> &)>
+									([&] (std::vector<LockableVector<T>>& inputVectors, std::vector<int> &commProto) {
+		startBarrier.waitForFinish ();
 		std::this_thread::sleep_for (std::chrono::milliseconds (1000));
-		barrier.decreaseBarrier ();
-		std::cout << "exiting..\n";
-	});*/
+		workersBarrier.decreaseBarrier ();
+		std::cout << "Exiting from communicationFunction..\n";
+	});
+
+
 
 	// ============================
 	// Setting up computation phase
