@@ -7,11 +7,12 @@
 #include <workerThread.hpp>
 
 #include <stdexcept>
+#include <iostream> // TODO remove me after test
 
 
 WorkerThread::WorkerThread () {
 	stopMe			= false;
-	task			= nullptr;
+	taskPresence	= false;
 	workerThread	= std::thread ([&] {
 		workerFunction ();
 	});
@@ -22,7 +23,8 @@ WorkerThread::WorkerThread () {
 
 WorkerThread::WorkerThread (WorkerThread&& wt) {
 	stopMe			= false;
-	task			= wt.task;
+	task			= std::move(wt.task);
+	taskPresence	= wt.taskPresence;
 	workerThread	= std::thread ([&] {
 		workerFunction ();
 	});
@@ -42,20 +44,21 @@ WorkerThread::~WorkerThread () {
 
 
 void WorkerThread::workerFunction () {
-	std::shared_ptr<Task> localTask	= nullptr;
+	Task localTask;
 
 	while (!stopMe) {
+		std::cout << "Waiting for a task..\n";
 		{
 			std::unique_lock<std::mutex> lock (taskMutex);
-			taskCV.wait (lock, [&] {return task!=nullptr || stopMe;});
-			localTask	= std::move (task);
-			task		= nullptr;
+			taskCV.wait (lock, [&] {return taskPresence==true || stopMe;});
+			localTask		= std::move(task);
+			taskPresence	= false;
 		}
 
 		if (!stopMe) {
 			// Executing submitted activity
-			std::future<void> taskFuture	= localTask->get_future ();
-			(*localTask) ();
+			//std::cout << "Executing..  " << localTask.use_count() << "\n";
+			localTask ();
 		}
 	}
 }
@@ -63,15 +66,17 @@ void WorkerThread::workerFunction () {
 
 
 
-void WorkerThread::assignActivity (std::shared_ptr<Task> a) {
+void WorkerThread::assignActivity (Task a) {
 	if (stopMe)
 		return ;
 
 	std::unique_lock<std::mutex> lock (taskMutex);
-	if (task != nullptr)
-		throw std::runtime_error ("An already assigned activity exists!");
-	taskCV.wait (lock, [&] {return task==nullptr || stopMe;});
-	task	= std::move(a);
+	
+	taskCV.wait (lock, [&] {return taskPresence==false || stopMe;});
+	if (!stopMe) {
+		task			= std::move(a);
+		taskPresence	= true;
+	}
 
 	taskCV.notify_all ();
 }

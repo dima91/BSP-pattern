@@ -28,7 +28,8 @@ public:
 private:
 	std::thread workerThread;
 
-	std::shared_ptr<Task>	task;
+	Task					task;
+	bool					taskPresence;
 	std::mutex				taskMutex;
 	std::condition_variable	taskCV;
 
@@ -43,7 +44,7 @@ public:
 	WorkerThread	(WorkerThread &&);
 	~WorkerThread	();
 
-	void assignActivity		(std::shared_ptr<Task> a);
+	void assignActivity		(Task a);
 	void performActivity	();
 	void stopWorker			();
 };

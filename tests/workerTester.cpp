@@ -16,9 +16,12 @@ void summer (int x, int y) {
 
 int main (int argn, char **argv) {
 	WorkerThread worker;
-	std::shared_ptr<WorkerThread::Task> aT	= std::make_shared<WorkerThread::Task> (std::bind (summer, 10, 20));
+	WorkerThread::Task aT	= WorkerThread::Task (std::bind (summer, 10, 20));
 
-	worker.assignActivity (aT);
+	this_thread::sleep_for (chrono::milliseconds (2000));
+
+	std::cout << "Assigning activity\n";
+	worker.assignActivity (std::move(aT));
 
 	this_thread::sleep_for (chrono::milliseconds (2000));
 
