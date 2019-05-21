@@ -29,6 +29,7 @@ public:
 	void decreaseBarrier ();
 	void reset (int activitiesNumber);
 	void waitForFinish ();
+	int getRemainingEntities ();
 };
 
 

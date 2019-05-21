@@ -7,7 +7,6 @@
 #include <workerThread.hpp>
 
 #include <stdexcept>
-#include <iostream> // TODO remove me after test
 
 
 WorkerThread::WorkerThread () {
@@ -47,7 +46,6 @@ void WorkerThread::workerFunction () {
 	Task localTask;
 
 	while (!stopMe) {
-		std::cout << "Waiting for a task..\n";
 		{
 			std::unique_lock<std::mutex> lock (taskMutex);
 			taskCV.wait (lock, [&] {return taskPresence==true || stopMe;});
@@ -57,7 +55,6 @@ void WorkerThread::workerFunction () {
 
 		if (!stopMe) {
 			// Executing submitted activity
-			//std::cout << "Executing..  " << localTask.use_count() << "\n";
 			localTask ();
 		}
 	}

@@ -54,3 +54,11 @@ void Barrier::waitForFinish () {
 	std::unique_lock<std::mutex> lock (barrierMutex);
 	barrierCV.wait (lock, [&] {return activitiesNumber == 0;});
 }
+
+
+
+
+int Barrier::getRemainingEntities () {
+	std::unique_lock<std::mutex> lock (barrierMutex);
+	return activitiesNumber;
+}

@@ -50,8 +50,14 @@ public:
 	LockableVector (std::vector<T> &externalVector) : dataVector(externalVector) {
 	}
 
-	LockableVector () {
+	LockableVector (LockableVector &&v) {
+		// TODO
 	}
+
+	LockableVector () {
+		// TODO
+	}
+
 
 	~LockableVector () {
 		// TODO
