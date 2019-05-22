@@ -31,20 +31,32 @@ public:
 	// Defines the type of a general activity
 	using ActivityFunction		= std::function<void (std::vector<T>&)>;
 
+	/* Type of function called at the end of superstep to decide whether contiue execution or not
+	 * Arguments:
+	 * 	index			The index of current superstep
+	 * 	outputVectors	(LockableVectors resulting at the end of communication phase
+	 * Returned values:
+	 *	-1		Termination reached
+	 *	n>=0	Termination not reached. 'n' is the index of the next supersted
+	 */
+	using TerminationChecker	= std::function<int (std::vector<LockableVector<T>>&)>;
+
 
 private:
 	// Holds the activity submitted by the user
 	std::vector<std::pair<ActivityFunction, std::function<CommunicationProtocol (std::vector<T>&)>>> activitiesFunctions;
+	const int currentSSIndex;
 	Barrier startBarrier;
 	Barrier compPhaseBarrier;
 	Barrier commPhaseBarrier;
+	TerminationChecker terminationChecker;
 
 	// Function executed by a generic WorkerThread
-	void workerFunction (int index, std::vector<T> &inputVectors, std::vector<LockableVector<T>> &outputVectors);
+	void workerFunction (int index, std::vector<T> &inputVector, std::vector<LockableVector<T>> &outputVectors);
 
 
 public:
-	Superstep ();
+	Superstep (int index);
 	~Superstep ();
 
 	int addActivity (ActivityFunction fun, CommunicationProtocol protocol);
@@ -59,6 +71,7 @@ public:
 					std::vector<LockableVector<T>> &outputVectors);
 
 	int getActivitiesNumber ();
+	void setTerminationChecker (TerminationChecker terminationChecker);
 };
 
 
@@ -71,7 +84,11 @@ public:
 
 
 template<typename T>
-Superstep<T>::Superstep () : startBarrier (0), compPhaseBarrier(0), commPhaseBarrier(0) {}
+Superstep<T>::Superstep (int index) : currentSSIndex (index), startBarrier (0), compPhaseBarrier(0), commPhaseBarrier(0) {
+	terminationChecker	= TerminationChecker ([&] (std::vector<LockableVector<T>> &outputItems) {
+		return currentSSIndex+1;
+	});
+}
 
 
 
@@ -109,6 +126,22 @@ int Superstep<T>::addActivity (ActivityFunction fun, std::function<Communication
 
 
 template<typename T>
+int Superstep<T>::getActivitiesNumber () {
+	return activitiesFunctions.size();
+}
+
+
+
+
+template<typename T>
+void Superstep<T>::setTerminationChecker (TerminationChecker terminationChecker) {
+	this->terminationChecker	= terminationChecker;
+}
+
+
+
+
+template<typename T>
 int Superstep<T>::runStep (std::vector<WorkerThread> &workers,
 							std::vector<std::vector<T>>	&inputVectors,
 							std::vector<LockableVector<T>> &outputVectors) {
@@ -127,10 +160,10 @@ int Superstep<T>::runStep (std::vector<WorkerThread> &workers,
 	for (size_t i=0; i<activitiesFunctions.size(); i++) {
 
 		// Bind packaged task to arguments
-		auto lambdaFunction	= [&] (int index, std::vector<std::vector<T>> &inputItems, std::vector<LockableVector<T>> &outputItems) {
-			workerFunction (index, inputItems[index], outputItems);
+		auto lambdaFunction	= [&] (int index, std::vector<T> &inputItems, std::vector<LockableVector<T>> &outputItems) {
+			workerFunction (index, inputItems, outputItems);
 		};
-		auto boundedFunction	= std::bind (lambdaFunction, i, std::ref(inputVectors), std::ref(outputVectors));
+		auto boundedFunction	= std::bind (lambdaFunction, i, std::ref(inputVectors[i]), std::ref(outputVectors));
 		auto packagedTask		= std::packaged_task<void()> (boundedFunction);
 
 		// Assign created packaged_task to a worker
@@ -140,8 +173,8 @@ int Superstep<T>::runStep (std::vector<WorkerThread> &workers,
 	// Starting workers and waiting for their completion
 	startBarrier.decreaseBarrier ();
 	commPhaseBarrier.waitForFinish ();
-
-	return -1;
+	
+	return terminationChecker (outputVectors);
 }
 
 

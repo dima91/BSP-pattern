@@ -33,9 +33,12 @@ int main (int argn, char **argv) {
 		parDeg	= std::atoi (argv[1]);
 
 
-	auto runnerF = std::function<void (std::vector<WorkerThread> &, std::vector<std::vector<int>> &, std::vector<LockableVector<int>> &, Superstep<int> &)> (
+	auto runnerF = std::function<int (std::vector<WorkerThread> &, std::vector<std::vector<int>> &, std::vector<LockableVector<int>> &, Superstep<int> &)> (
 	[] (std::vector<WorkerThread> &workers, std::vector<std::vector<int>> &inV, std::vector<LockableVector<int>> &outV, Superstep<int> &sstep) {
-		sstep.runStep (workers, inV, outV);
+
+		int nextStep	= sstep.runStep (workers, inV, outV);
+
+		std::cout << "Next step : " << nextStep << std::endl;
 
 		/*for (size_t h=0; h<inputVectors.size(); h++) {
 			inputVectors[h].clear ();
@@ -58,6 +61,8 @@ int main (int argn, char **argv) {
 				cout << el << "\t";
 			std::cout << endl;
 		}
+
+		return nextStep;
 	});
 
 
@@ -68,8 +73,8 @@ int main (int argn, char **argv) {
 	std::vector<LockableVector<int>> outputVectors (parDeg);
 
 	std::vector<std::vector<int>> comProto (parDeg);
-	Superstep<int> s0;
-	Superstep<int> s1;
+	Superstep<int> s0 (0);
+	Superstep<int> s1 (1);
 
 	for (int i=0; i<parDeg; i++) {
 		// ==============
@@ -83,7 +88,7 @@ int main (int argn, char **argv) {
 		auto aComFun	= IntCommunicationProtocolFun ([parDeg, i] (std::vector<int> els) {
 				std::random_device random_device;
 				std::mt19937 engine{random_device()};
-				std::uniform_int_distribution<int> dist(200, 1000);
+				std::uniform_int_distribution<int> dist(100, 300);
 				std::this_thread::sleep_for (std::chrono::milliseconds (dist(engine)));
 
 				IntCommunicationProtocol cp (parDeg);
@@ -105,7 +110,7 @@ int main (int argn, char **argv) {
 		auto bComFun	= IntCommunicationProtocolFun ([parDeg, i] (std::vector<int> els) {
 			std::random_device random_device;
 			std::mt19937 engine{random_device()};
-			std::uniform_int_distribution<int> dist(200, 1000);
+			std::uniform_int_distribution<int> dist(100, 300);
 			std::this_thread::sleep_for (std::chrono::milliseconds (dist(engine)));
 
 			IntCommunicationProtocol cp (parDeg);
@@ -137,15 +142,19 @@ int main (int argn, char **argv) {
 
 
 	std::cout << "Starting input vectors..\n";
-		for (size_t i=0; i<inputVectors.size(); i++) {
-			cout << i << " >  ";
-			for (auto el : inputVectors[i])
-				cout << el << "\t";
-			std::cout << endl;
-		}
+	for (size_t i=0; i<inputVectors.size(); i++) {
+		cout << i << " >  ";
+		for (auto el : inputVectors[i])
+			cout << el << "\t";
+		std::cout << endl;
+	}
+
+	s0.setTerminationChecker ([] (std::vector<LockableVector<int>> &outV) {
+		return 0;
+	});
 
 
-	runnerF (workers, inputVectors, outputVectors, s0);
+	int ns	= runnerF (workers, inputVectors, outputVectors, s0);
 
 	std::cout << std::endl << std::endl << "Second superstep..\n\n\n";
 
@@ -158,7 +167,10 @@ int main (int argn, char **argv) {
 		outputVectors[i].getVector().clear ();
 	}
 
-	runnerF (workers, inputVectors, outputVectors, s1);
+	if (ns == 0)
+		runnerF (workers, inputVectors, outputVectors, s0);
+	else
+		runnerF (workers, inputVectors, outputVectors, s1);
 
 	std::for_each (workers.begin(), workers.end(), [] (WorkerThread& wt) {wt.stopWorker();});
 
