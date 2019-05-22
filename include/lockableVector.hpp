@@ -50,17 +50,13 @@ public:
 	LockableVector (std::vector<T> &externalVector) : dataVector(externalVector) {
 	}
 
-	LockableVector (LockableVector &&v) {
-		// TODO
-	}
-
 	LockableVector () {
-		// TODO
+		// Do nothing
 	}
 
 
 	~LockableVector () {
-		// TODO
+		// Do nothing
 	}
 
 
@@ -74,10 +70,23 @@ public:
 		return dataVector;
 	}
 
+	void swap (std::vector<T> &targetVector) {
+		std::unique_lock<std::mutex> lock (vectorMutex);
+		std::swap (dataVector, targetVector);
+	}
+
 
 	std::unique_ptr<LockedVector<T>> lockAndGet () {
 		vectorMutex.lock ();
 		return std::unique_ptr<LockedVector<T>> (new LockedVector<T> (dataVector, this));
+	}
+
+
+	std::unique_ptr<LockedVector<T>> tryLockAndGet () {
+		if (vectorMutex.try_lock ())
+			return std::unique_ptr<LockedVector<T>> (new LockedVector<T> (dataVector, this));
+		
+		throw std::logic_error ("No lock acquired");
 	}
 };
 

@@ -8,6 +8,15 @@
 using namespace std;
 
 
+void printVector (std::vector<int> &v, std::string ph = "") {
+	std::cout << ph;
+	for (auto i : v) {
+		std::cout << i << " ";
+	}
+	std::cout << std::endl;
+}
+
+
 int main (int argn, char **argv) {
 	cout << "Hello user!!\n";
 
@@ -49,6 +58,31 @@ int main (int argn, char **argv) {
 
 	handle0.wait ();
 	handle1.wait ();
+
+	// Testing swap method
+	LockableVector<int> lv;
+	std::vector<int> v;
+
+	lv.getVector().push_back (0);
+	lv.getVector().push_back (2);
+	lv.getVector().push_back (4);
+	lv.getVector().push_back (6);
+	lv.getVector().push_back (8);
+
+	v.push_back (1);
+	v.push_back (3);
+	v.push_back (5);
+	v.push_back (7);
+	v.push_back (9);
+
+	printVector (lv.getVector(), "Original lv:  ");		// OUTPUT -> Original lv:  0 2 4 6 8
+	printVector (v, "Original V:   ");					// OUTPUT -> Original v:   1 3 5 7 9
+
+	std::cout << std::endl;
+
+	lv.swap (v);
+	printVector (lv.getVector(), "Swapped lv:  ");		// OUTPUT -> Swapped lv:  1 3 5 7 9
+	printVector (v, "Swapped v:   ");					// OUTPUT -> Swapped v:   0 2 4 6 8
 
 	return 0;
 }
