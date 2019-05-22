@@ -36,10 +36,10 @@ public:
 	}
 
 
-	//void addSuperStep (std::shared_ptr<Superstep> sstep);
+	//void addSuperStep (Superstep sstep);
 
 
-	//void runAndWait (std::vector<std::vector<T>> firstInput, std::vector<std::vector<T>> &ouput);
+	//void runAndWait (std::vector<std::vector<T>> input, std::vector<std::vector<T>> &ouput);
 };
 
 

@@ -12,6 +12,9 @@
 #include <barrier.hpp>
 #include <lockableVector.hpp>
 
+#include <list>
+#include <algorithm>
+#include <numeric>
 #include <iostream>		// REMOVE ME AFTER TESTS
 
 
@@ -19,7 +22,7 @@
 template<typename T>
 class Superstep {
 public:
-	/* Defines the type of function which will be executed during the "communication phase" of BSP pattern.
+	/* Describes the data-type necessary to perform the comunication phase:
 	 * The i-th position of the vector contains indexes of elements which will be sent to activity x
 	 * of next superstep (length of this vector should be equal to parallelism degree)
 	 */
@@ -37,7 +40,7 @@ private:
 	Barrier commPhaseBarrier;
 
 	// Function executed by a generic WorkerThread
-	void workerFunction (int index, std::vector<LockableVector<T>> &dataVectors);
+	void workerFunction (int index, std::vector<T> &inputVectors, std::vector<LockableVector<T>> &outputVectors);
 
 
 public:
@@ -48,11 +51,12 @@ public:
 	int addActivity (ActivityFunction fun, std::function<CommunicationProtocol (std::vector<T>&)> protocol);
 
 	/* Method to execute this current superstep. It requries a vector of workers on which the activity will be run,
-	 * a vector containing ConcurentQueues which hold input elements for that worker and a vector in which will be
-	 * savede output elements
+	 * a vector containing vector which hold input elements for that worker and a LockableVector on which will be
+	 * saved output elements
 	 */
 	int runStep (std::vector<WorkerThread> &workers,
-					std::vector<LockableVector<T>> &dataVectors);
+					std::vector<std::vector<T>> &inputVectors,
+					std::vector<LockableVector<T>> &outputVectors);
 
 	int getActivitiesNumber ();
 };
@@ -79,7 +83,6 @@ Superstep<T>::~Superstep () {}
 
 template<typename T>
 int Superstep<T>::addActivity (ActivityFunction fun, CommunicationProtocol protocol) {
-	// TODO
 	auto protoFun	= std::function<Superstep<T>::CommunicationProtocol (std::vector<int> &)> ([protocol] (std::vector<int> els) {
 							return protocol;
 						});
@@ -95,7 +98,6 @@ int Superstep<T>::addActivity (ActivityFunction fun, CommunicationProtocol proto
 
 template<typename T>
 int Superstep<T>::addActivity (ActivityFunction fun, std::function<CommunicationProtocol (std::vector<T>&)> protocol) {
-	// TODO
 	auto element	= std::make_pair<ActivityFunction, std::function<CommunicationProtocol (std::vector<T>&)>>
 						(std::move(fun), std::move(protocol));
 	activitiesFunctions.push_back (std::move(element));
@@ -108,7 +110,8 @@ int Superstep<T>::addActivity (ActivityFunction fun, std::function<Communication
 
 template<typename T>
 int Superstep<T>::runStep (std::vector<WorkerThread> &workers,
-							std::vector<LockableVector<T>> &dataVectors) {
+							std::vector<std::vector<T>>	&inputVectors,
+							std::vector<LockableVector<T>> &outputVectors) {
 
 	if (workers.size () < activitiesFunctions.size()) {
 		throw std::runtime_error ("Mismatching between number of workers and number of activities! (#workers < #activities)");
@@ -121,15 +124,14 @@ int Superstep<T>::runStep (std::vector<WorkerThread> &workers,
 
 
 	// Setting up worker threads
-	std::cout << "size: " << activitiesFunctions.size() << std::endl;;
 	for (size_t i=0; i<activitiesFunctions.size(); i++) {
 
 		// Bind packaged task to arguments
-		auto lambdaFunction	= [&] (int index, std::vector<LockableVector<T>> &inputItems) {
-			workerFunction (index, inputItems);
+		auto lambdaFunction	= [&] (int index, std::vector<std::vector<T>> &inputItems, std::vector<LockableVector<T>> &outputItems) {
+			workerFunction (index, inputItems[index], outputItems);
 		};
-		auto boundedFunction	= std::bind (lambdaFunction, i, std::ref(dataVectors));
-		auto packagedTask	= std::packaged_task<void()> (boundedFunction);
+		auto boundedFunction	= std::bind (lambdaFunction, i, std::ref(inputVectors), std::ref(outputVectors));
+		auto packagedTask		= std::packaged_task<void()> (boundedFunction);
 
 		// Assign created packaged_task to a worker
 		workers[i].assignActivity (std::move(packagedTask));
@@ -146,23 +148,48 @@ int Superstep<T>::runStep (std::vector<WorkerThread> &workers,
 
 
 template<typename T>
-void Superstep<T>::workerFunction (int index, std::vector<LockableVector<T>> &inputItems) {
+void Superstep<T>::workerFunction (int index, std::vector<T> &inputItems, std::vector<LockableVector<T>> &outputItems) {
 	startBarrier.waitForFinish ();
 
+	
 	// ============================
 	// Performing computation phase
-	activitiesFunctions[index].first (inputItems[index].getVector());
+	activitiesFunctions[index].first (inputItems);
 	compPhaseBarrier.decreaseBarrier ();
 
-	std::cout << "End of computation phase\n";
 
 	// ==============================
 	// Performing communication phase
-	// TODO
-	CommunicationProtocol protocol	= activitiesFunctions[index].second (inputItems[index].getVector());
-	/*std::this_thread::sleep_for (std::chrono::milliseconds (1000));		// Simulating communication phase*/
+	CommunicationProtocol protocol	= activitiesFunctions[index].second (inputItems);
+	std::list<int> remainingActivities (activitiesFunctions.size());
+	int idx=0;
+	std::iota (std::begin(remainingActivities), std::end(remainingActivities), idx++);
+
+
+	while (remainingActivities.size() > 0) {
+		std::list<int> &ra	= remainingActivities;
+		for (auto it=ra.begin(); it!=ra.end(); it++) {
+
+			if (protocol[*it].size() == 0) {
+				remainingActivities.erase (it++);
+			}
+			else {
+				try {
+					std::unique_ptr<LockedVector<T>> targetV	= outputItems[*it].tryLockAndGet();
+					auto &targetProtocol						= protocol[*it];
+					// Inserting data at the end of target vector
+					for (auto i : targetProtocol)
+						targetV->data.insert (targetV->data.end(), std::move(inputItems[i]));
+
+					remainingActivities.erase (it++);
+				} catch (std::logic_error &e) {
+					std::cout << "Cannot lock vector of i-th activity\n";
+				}
+			}
+		}
+	}
+
 	commPhaseBarrier.decreaseBarrier ();
-	std::cout << "Exiting from workerFunction\n";
 }
 
 
