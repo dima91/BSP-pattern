@@ -4,7 +4,7 @@ BIN_DIR	= bin
 OBJ_DIR	= obj
 CC		= g++
 CFLAGS	= -I include -lpthread -Wall -pedantic -O3 -std=c++11
-TESTS	= ${BIN_DIR}/QueueTester ${BIN_DIR}/BarrierTester ${BIN_DIR}/WorkerTester ${BIN_DIR}/Tiskin ${BIN_DIR}/LockableVectorTester ${BIN_DIR}/SuperstepTester ${BIN_DIR}/BspTester
+TESTS	= ${BIN_DIR}/QueueTester ${BIN_DIR}/BarrierTester ${BIN_DIR}/WorkerTester ${BIN_DIR}/Tsikin ${BIN_DIR}/LockableVectorTester ${BIN_DIR}/SuperstepTester ${BIN_DIR}/BspTester
 
 all :
 	-mkdir ${BIN_DIR}
@@ -14,7 +14,7 @@ all :
 
 
 
-${BIN_DIR}/Tiskin : src/tiskin.cpp include/bsp.hpp include/concurrentQueue.hpp
+${BIN_DIR}/Tsikin : src/tsikin.cpp include/bsp.hpp include/concurrentQueue.hpp
 	${CC} -o $@ $< ${CFLAGS}
 
 

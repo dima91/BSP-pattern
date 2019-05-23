@@ -15,7 +15,7 @@ The goal in this case is to provide a pattern implementing a BSP computation suc
 
 For the sake of simplicity, we assume all items exchanged in communications must have the same type T.
 
-The pattern must be tested executing the Tiskin BSP sortingalgorithm described as follows:
+The pattern must be tested executing the Tsikin BSP sortingalgorithm described as follows:
 + the *n* input items to be sorted are distributed among *p* concurrent activities (*n/p* each, *n* must be multiple of *p*);
 + **first super-step**: each concurrent activity sorts its data portion and then selects p+1 samples uniformly distributed in the ordered sequence and including the first and the last item in the ordered sequence. At the end of the super-step, each concurrent activity sends to the all the other concurrent activities the p+1 samples;
 + **second super-step**: each concurrent activity sorts the list of all samples received, including the ones computed on its own. Then it picks up *p+1* separator items equally distributed in the sequence. Subsequently sends all the items in between separator *p* and *p+1* to concurrent activity *p*;

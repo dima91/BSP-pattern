@@ -91,7 +91,7 @@ int main (int argn, char **argv) {
 				std::uniform_int_distribution<int> dist(100, 300);
 				std::this_thread::sleep_for (std::chrono::milliseconds (dist(engine)));
 
-				IntCommunicationProtocol cp (parDeg);
+				IntCommunicationProtocol cp (parDeg+1);
 				cp[(i+1)%parDeg] = {0, 1};
 
 				return cp;

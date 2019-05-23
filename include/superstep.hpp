@@ -58,7 +58,6 @@ private:
 
 public:
 	Superstep ();
-	Superstep (Superstep<T> &original);
 	~Superstep ();
 
 	int addActivity (ActivityFunction fun, CommunicationProtocol protocol);
@@ -108,6 +107,7 @@ int Superstep<T>::addActivity (ActivityFunction fun, CommunicationProtocol proto
 						});
 	auto element	= std::make_pair<ActivityFunction, std::function<CommunicationProtocol (std::vector<T>&)>>
 						(std::move(fun), std::move(protoFun));
+
 	activitiesFunctions.push_back (std::move(element));
 
 	return activitiesFunctions.size()-1;
