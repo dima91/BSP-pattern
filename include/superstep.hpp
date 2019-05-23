@@ -37,26 +37,28 @@ public:
 	 * 	outputVectors	(LockableVectors resulting at the end of communication phase
 	 * Returned values:
 	 *	-1		Termination reached
-	 *	n>=0	Termination not reached. 'n' is the index of the next supersted
+	 *  -2		Next superstep
+	 *	n>=0	Termination not reached. 'n' is the index of the next superstep
 	 */
-	using TerminationChecker	= std::function<int (std::vector<LockableVector<T>>&)>;
+	using AtExitFunction	= std::function<int (std::vector<LockableVector<T>>&)>;
 
 
 private:
 	// Holds the activity submitted by the user
 	std::vector<std::pair<ActivityFunction, std::function<CommunicationProtocol (std::vector<T>&)>>> activitiesFunctions;
-	const int currentSSIndex;
+	//const int currentSSIndex;
 	Barrier startBarrier;
 	Barrier compPhaseBarrier;
 	Barrier commPhaseBarrier;
-	TerminationChecker terminationChecker;
+	AtExitFunction atExitF;
 
 	// Function executed by a generic WorkerThread
 	void workerFunction (int index, std::vector<T> &inputVector, std::vector<LockableVector<T>> &outputVectors);
 
 
 public:
-	Superstep (int index);
+	Superstep ();
+	Superstep (Superstep<T> &original);
 	~Superstep ();
 
 	int addActivity (ActivityFunction fun, CommunicationProtocol protocol);
@@ -71,7 +73,7 @@ public:
 					std::vector<LockableVector<T>> &outputVectors);
 
 	int getActivitiesNumber ();
-	void setTerminationChecker (TerminationChecker terminationChecker);
+	void setAtExitFunction (AtExitFunction atExit);
 };
 
 
@@ -84,11 +86,12 @@ public:
 
 
 template<typename T>
-Superstep<T>::Superstep (int index) : currentSSIndex (index), startBarrier (0), compPhaseBarrier(0), commPhaseBarrier(0) {
-	terminationChecker	= TerminationChecker ([&] (std::vector<LockableVector<T>> &outputItems) {
-		return currentSSIndex+1;
+Superstep<T>::Superstep () : startBarrier (0), compPhaseBarrier(0), commPhaseBarrier(0) {
+	atExitF	= AtExitFunction ([&] (std::vector<LockableVector<T>> &outputItems) {
+		return -2;
 	});
 }
+
 
 
 
@@ -134,8 +137,8 @@ int Superstep<T>::getActivitiesNumber () {
 
 
 template<typename T>
-void Superstep<T>::setTerminationChecker (TerminationChecker terminationChecker) {
-	this->terminationChecker	= terminationChecker;
+void Superstep<T>::setAtExitFunction (AtExitFunction atExitFun) {
+	atExitF	= atExitFun;
 }
 
 
@@ -174,7 +177,7 @@ int Superstep<T>::runStep (std::vector<WorkerThread> &workers,
 	startBarrier.decreaseBarrier ();
 	commPhaseBarrier.waitForFinish ();
 	
-	return terminationChecker (outputVectors);
+	return atExitF (outputVectors);
 }
 
 

@@ -35,7 +35,7 @@ int main (int argn, char **argv) {
 
 	auto runnerF = std::function<int (std::vector<WorkerThread> &, std::vector<std::vector<int>> &, std::vector<LockableVector<int>> &, Superstep<int> &)> (
 	[] (std::vector<WorkerThread> &workers, std::vector<std::vector<int>> &inV, std::vector<LockableVector<int>> &outV, Superstep<int> &sstep) {
-
+		
 		int nextStep	= sstep.runStep (workers, inV, outV);
 
 		std::cout << "Next step : " << nextStep << std::endl;
@@ -73,8 +73,8 @@ int main (int argn, char **argv) {
 	std::vector<LockableVector<int>> outputVectors (parDeg);
 
 	std::vector<std::vector<int>> comProto (parDeg);
-	Superstep<int> s0 (0);
-	Superstep<int> s1 (1);
+	Superstep<int> s0;
+	Superstep<int> s1;
 
 	for (int i=0; i<parDeg; i++) {
 		// ==============
@@ -149,9 +149,9 @@ int main (int argn, char **argv) {
 		std::cout << endl;
 	}
 
-	s0.setTerminationChecker ([] (std::vector<LockableVector<int>> &outV) {
-		return 0;
-	});
+	/*s0.setAtExitFunction ([] (std::vector<LockableVector<int>> &outV) {
+		return 2;
+	});*/
 
 
 	int ns	= runnerF (workers, inputVectors, outputVectors, s0);
