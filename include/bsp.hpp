@@ -8,20 +8,17 @@
 #ifndef BSP_HPP
 #define BSP_HPP
 
-#define PRINT_VECTOR(label, v) {\
-		std::cout << label << "\n";\
-		for (size_t i=0; i<v.size(); i++) {\
-			std::cout << i << " >  ";\
-			for (auto el : v[i])\
-				std::cout << el << "\t";\
-			std::cout << std::endl;\
-		}\
-}
-
 #include <workerThread.hpp>
 #include <superstep.hpp>
 
 #include <vector>
+
+#define BSP_PRINT_V(lbl, vec, footer) {\
+	std::cout << lbl << std::endl;\
+	for (auto el : vec)\
+		std::cout << el << " ";\
+	std::cout << std::endl << footer;\
+}
 
 
 
@@ -128,12 +125,14 @@ void BSP<T>::runAndWait (std::vector<std::vector<T>> &input, std::vector<std::ve
 
 		retVal	= supersteps[nextStep]->runStep (workers, input, lockableVectors);
 
+		int i = 0;
+
 		if (retVal == NextStepFlag) {
 			nextStep++;
 			swapVectors (input, lockableVectors);
 		}
 		else if (retVal == EOCFlag) {
-			// TODO
+			swapVectors (input, lockableVectors);
 		}
 		else {
 			nextStep	= retVal;
@@ -141,8 +140,14 @@ void BSP<T>::runAndWait (std::vector<std::vector<T>> &input, std::vector<std::ve
 		}
 	}
 
+	/*BSP_PRINT_V ("Out_0", input[0], "")
+	BSP_PRINT_V ("Out_1", input[1], "")
+	BSP_PRINT_V ("Out_2", input[2], "\n")*/
+	
 
-	output	= input;
+
+	//output	= input;
+	std::swap (output, input);
 }
 
 

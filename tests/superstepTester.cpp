@@ -11,7 +11,7 @@
 using namespace std;
 using IntActivityFunction			= Superstep<int>::ActivityFunction;
 using IntCommunicationProtocol		= Superstep<int>::CommunicationProtocol;
-using IntCommunicationProtocolFun	= std::function<Superstep<int>::CommunicationProtocol (std::vector<int> &)>;
+using IntCommunicationProtocolFun	= std::function<Superstep<int>::CommunicationProtocol (int, std::vector<int> &)>;
 
 
 
@@ -79,13 +79,13 @@ int main (int argn, char **argv) {
 	for (int i=0; i<parDeg; i++) {
 		// ==============
 		// First activity
-		IntActivityFunction aFun	= IntActivityFunction ([] (std::vector<int> &inputs) {
+		IntActivityFunction aFun	= IntActivityFunction ([] (int actIdx, std::vector<int> &inputs) {
 			for (size_t i=0; i<inputs.size(); i++) {
 				inputs[i]	= pow (inputs[i], 2);
 			}
 			return ;
 		});
-		auto aComFun	= IntCommunicationProtocolFun ([parDeg, i] (std::vector<int> els) {
+		auto aComFun	= IntCommunicationProtocolFun ([parDeg, i] (int actIdx, std::vector<int> els) {
 				std::random_device random_device;
 				std::mt19937 engine{random_device()};
 				std::uniform_int_distribution<int> dist(100, 300);
@@ -101,13 +101,13 @@ int main (int argn, char **argv) {
 
 		// ===============
 		// Second activity
-		IntActivityFunction bFun	= IntActivityFunction ([] (std::vector<int> &inputs) {
+		IntActivityFunction bFun	= IntActivityFunction ([] (int actIdx, std::vector<int> &inputs) {
 			for (size_t i=0; i<inputs.size(); i++) {
 				inputs[i]	= pow (inputs[i], 0.5);
 			}
 			return ;
 		});
-		auto bComFun	= IntCommunicationProtocolFun ([parDeg, i] (std::vector<int> els) {
+		auto bComFun	= IntCommunicationProtocolFun ([parDeg, i] (int actIdx, std::vector<int> els) {
 			std::random_device random_device;
 			std::mt19937 engine{random_device()};
 			std::uniform_int_distribution<int> dist(100, 300);

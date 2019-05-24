@@ -8,6 +8,13 @@
 #ifndef SUPERSTEP_HPP
 #define SUPERSTEP_HPP
 
+#define PRINT_VECTOR(label, v, suffix) {\
+	std::cout << label << "\n";\
+	for (auto el : v)\
+		std::cout << el << "\t";\
+	std::cout << suffix;\
+}
+
 #include <workerThread.hpp>
 #include <barrier.hpp>
 #include <lockableVector.hpp>
@@ -23,13 +30,13 @@ template<typename T>
 class Superstep {
 public:
 	/* Describes the data-type necessary to perform the comunication phase:
-	 * The i-th position of the vector contains indexes of elements which will be sent to activity x
+	 * The i-th position of the vector contains elements which will be sent to activity i
 	 * of next superstep (length of this vector should be equal to parallelism degree)
 	 */
-	using CommunicationProtocol	= std::vector<std::vector<int>>;
+	using CommunicationProtocol	= std::vector<std::vector<T>>;
 
 	// Defines the type of a general activity
-	using ActivityFunction		= std::function<void (std::vector<T>&)>;
+	using ActivityFunction		= std::function<void (int, std::vector<T>&)>;
 
 	/* Type of function called at the end of superstep to decide whether contiue execution or not
 	 * Arguments:
@@ -45,7 +52,7 @@ public:
 
 private:
 	// Holds the activity submitted by the user
-	std::vector<std::pair<ActivityFunction, std::function<CommunicationProtocol (std::vector<T>&)>>> activitiesFunctions;
+	std::vector<std::pair<ActivityFunction, std::function<CommunicationProtocol (int, std::vector<T>&)>>> activitiesFunctions;
 	//const int currentSSIndex;
 	Barrier startBarrier;
 	Barrier compPhaseBarrier;
@@ -55,13 +62,15 @@ private:
 	// Function executed by a generic WorkerThread
 	void workerFunction (int index, std::vector<T> &inputVector, std::vector<LockableVector<T>> &outputVectors);
 
+	static std::atomic_int nextVectorToLock;
+
 
 public:
 	Superstep ();
 	~Superstep ();
 
 	int addActivity (ActivityFunction fun, CommunicationProtocol protocol);
-	int addActivity (ActivityFunction fun, std::function<CommunicationProtocol (std::vector<T>&)> protocol);
+	int addActivity (ActivityFunction fun, std::function<CommunicationProtocol (int, std::vector<T>&)> protocol);
 
 	/* Method to execute this current superstep. It requries a vector of workers on which the activity will be run,
 	 * a vector containing vector which hold input elements for that worker and a LockableVector on which will be
@@ -74,6 +83,10 @@ public:
 	int getActivitiesNumber ();
 	void setAtExitFunction (AtExitFunction atExit);
 };
+
+
+template<typename T>
+std::atomic_int Superstep<T>::nextVectorToLock;
 
 
 
@@ -117,8 +130,8 @@ int Superstep<T>::addActivity (ActivityFunction fun, CommunicationProtocol proto
 
 
 template<typename T>
-int Superstep<T>::addActivity (ActivityFunction fun, std::function<CommunicationProtocol (std::vector<T>&)> protocol) {
-	auto element	= std::make_pair<ActivityFunction, std::function<CommunicationProtocol (std::vector<T>&)>>
+int Superstep<T>::addActivity (ActivityFunction fun, std::function<CommunicationProtocol (int activityIndex, std::vector<T>&)> protocol) {
+	auto element	= std::make_pair<ActivityFunction, std::function<CommunicationProtocol (int activityIndex, std::vector<T>&)>>
 						(std::move(fun), std::move(protocol));
 	activitiesFunctions.push_back (std::move(element));
 	
@@ -190,39 +203,44 @@ void Superstep<T>::workerFunction (int index, std::vector<T> &inputItems, std::v
 	
 	// ============================
 	// Performing computation phase
-	activitiesFunctions[index].first (inputItems);
+	activitiesFunctions[index].first (index, inputItems);
 	compPhaseBarrier.decreaseBarrier ();
 
 
 	// ==============================
 	// Performing communication phase
-	CommunicationProtocol protocol	= activitiesFunctions[index].second (inputItems);
+	CommunicationProtocol protocol	= activitiesFunctions[index].second (index, std::ref(inputItems));
 	std::list<int> remainingActivities (activitiesFunctions.size());
-	int idx=0;
+	int idx	= 0;
 	std::iota (std::begin(remainingActivities), std::end(remainingActivities), idx++);
 
 
+	int vectorOffset	= (nextVectorToLock++) % remainingActivities.size();
 	while (remainingActivities.size() > 0) {
 		std::list<int> &ra	= remainingActivities;
-		for (auto it=ra.begin(); it!=ra.end(); it++) {
+		auto it	= std::begin(ra);
+		std::advance (it, vectorOffset);
+		while (it!=ra.end()) {
 
 			if (protocol[*it].size() == 0) {
 				remainingActivities.erase (it++);
 			}
 			else {
 				try {
-					std::unique_ptr<LockedVector<T>> targetV	= outputItems[*it].tryLockAndGet();
+					std::shared_ptr<LockedVector<T>> targetV	= outputItems[*it].tryLockAndGet();
 					auto &targetProtocol						= protocol[*it];
 					// Inserting data at the end of target vector
-					for (auto i : targetProtocol)
-						targetV->data.insert (targetV->data.end(), std::move(inputItems[i]));
+					for (auto i : targetProtocol) {
+						targetV->data.insert (targetV->data.end(), std::move(i));
+					}
 
 					remainingActivities.erase (it++);
 				} catch (std::logic_error &e) {
-					std::cout << "Cannot lock vector of i-th activity\n";
+					it++;
 				}
 			}
 		}
+		vectorOffset	= 0;
 	}
 
 	commPhaseBarrier.decreaseBarrier ();

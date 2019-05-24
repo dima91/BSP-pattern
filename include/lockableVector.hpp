@@ -11,6 +11,7 @@
 #include <vector>
 #include <mutex>
 #include <condition_variable>
+#include <iostream>				// FIXME REMOVE ME
 
 // Forward class declaration
 template<typename T>
@@ -76,16 +77,16 @@ public:
 	}
 
 
-	std::unique_ptr<LockedVector<T>> lockAndGet () {
+	std::shared_ptr<LockedVector<T>> lockAndGet () {
 		vectorMutex.lock ();
-		return std::unique_ptr<LockedVector<T>> (new LockedVector<T> (dataVector, this));
+		return std::shared_ptr<LockedVector<T>> (new LockedVector<T> (dataVector, this));
 	}
 
 
-	std::unique_ptr<LockedVector<T>> tryLockAndGet () {
-		if (vectorMutex.try_lock ())
-			return std::unique_ptr<LockedVector<T>> (new LockedVector<T> (dataVector, this));
-		
+	std::shared_ptr<LockedVector<T>> tryLockAndGet () {
+		if (vectorMutex.try_lock ()) {
+			return std::shared_ptr<LockedVector<T>> (new LockedVector<T> (dataVector, this));
+		}
 		throw std::logic_error ("No lock acquired");
 	}
 };
