@@ -125,8 +125,6 @@ void BSP<T>::runAndWait (std::vector<std::vector<T>> &input, std::vector<std::ve
 
 		retVal	= supersteps[nextStep]->runStep (workers, input, lockableVectors);
 
-		int i = 0;
-
 		if (retVal == NextStepFlag) {
 			nextStep++;
 			swapVectors (input, lockableVectors);
