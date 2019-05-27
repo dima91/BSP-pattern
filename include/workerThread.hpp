@@ -47,6 +47,7 @@ public:
 	void assignActivity		(Task a);
 	void performActivity	();
 	void stopWorker			();
+	void setAffinity		(unsigned int idx);
 };
 
 

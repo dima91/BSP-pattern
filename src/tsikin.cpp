@@ -6,11 +6,14 @@
 
 
 #include <bsp.hpp>
+#include <uTimer.hpp>
 
 #include <iostream>
 #include <random>
 #include <map>
 #include <mutex>
+#include <algorithm>
+
 
 #define DEBUG
 
@@ -30,6 +33,7 @@
 using IntVector					= std::vector<int>;
 using IntCommunicationProtocol	= Superstep<int>::CommunicationProtocol;
 using CommunicationProtocolFun	= std::function<IntCommunicationProtocol (std::vector<int> &)>;
+using Parameters				= std::tuple<int, int, int, bool>;
 
 
 std::mutex outputMutex;
@@ -39,8 +43,81 @@ std::mutex mapMutex;
 
 
 
+bool parseArgs (int argn, char **argv, Parameters &params) {
+	//           0        1  2  3  4  5
+	// ./tsikinAlgorithm 256 8 -s 10 -a
+	// ./tsikinAlgorithm 256 8 -a -s 10
+	if (argn < 3 || argn > 6) {
+		return false;
+	}
+
+	try {
+		int n			= std::atoi (argv[1]);
+		int p			= std::atoi (argv[2]);
+		int seed		= -1;
+		bool affinity	= false;
+		
+		
+		if (argn == 4) {
+			std::string arg3	= argv[3];
+			if (arg3 == "-a")
+				affinity	= true;
+			else
+				return false;
+		}
+		else if (argn == 5) {
+			std::string arg3	= argv[3];
+			if (arg3 == "-s")
+				seed	= std::atoi (argv[4]);
+			else
+				return false;
+		}
+		else if (argn == 6) {
+			std::string arg3	= argv[3];
+			std::string arg4	= argv[4];
+			std::string arg5	= argv[5];
+
+			if (arg3 == "-s" && arg5 == "-a") {
+				seed		= std::atoi (argv[4]);
+				affinity	= true;
+			}
+			else if (arg3 == "-a" && arg4 == "-s") {
+				seed		= std::atoi (argv[5]);
+				affinity	= true;
+			}
+			else
+				return false;
+		}
+
+		if (n%p != 0) {
+			std::cerr << "The length of vector must be multiple of number of processors!\n";
+			return false;
+		}
+
+		params	= Parameters (n, p, seed, affinity);
+
+		return true;
+	} catch (...) {
+		return false;
+	}
+}
+
+
+
+
 void createRandomVector (IntVector &input, int seed) {
-    std::mt19937 mt (seed);
+	int idx	= 0;
+	std::mt19937 mt (seed);
+	std::uniform_int_distribution<int> dist (0, input.size());
+	std::iota (input.begin(), input.end(), idx++);
+
+	std::random_shuffle (input.begin(), input.end());
+}
+
+
+
+/*void createRandomVector (IntVector &input, int seed) {
+	std::mt19937 mt (seed);
 	std::uniform_int_distribution<int> dist (1, input.size()*10);
 	int nextInt	= 0;
 
@@ -50,39 +127,28 @@ void createRandomVector (IntVector &input, int seed) {
 		} while (std::find(input.begin(), input.end(), nextInt) != input.end());
 		input[i]	= nextInt;
 	}
-}
+}*/
 
 
-void putPPlusOneElements (IntVector &target, IntVector &source, int p) {
-	//TSIKIN_PRINT_V ("taking " << p << "elements from ", source, "");
 
-	auto it		= source.begin();
-	int size1	= source.size()-1;		// Number of elements to be taken into account (belonging to vector)
-	int p1		= p-1;					// Number of elements to be selected
-	int h		= size1/p1;				// Size of subset
-    int k		= size1%p1;				// Number of subset with size h+1
-	int i		= 0;					// Index of target array
-	int tmpN1	= 0;
 
-	//std::cout << h << " " << k << std::endl << std::endl;
-	
-	while (k--) {
-		target[i++]	= *(it++);
-		tmpN1		= h;
-		while (tmpN1--)
-			it++;
-    }
-    while (it != source.end()-1) {
-		target[i++]	= *(it++);
-		tmpN1	= h-1;
-		while (tmpN1--)
-			it++;
+/*void createRandomVector (IntVector &input, int seed) {
+	int idx			= 0;
+	int inputSize	= input.size ();
+	std::list<int> sourceList (inputSize*10);
+	std::mt19937 mt (seed);
+	std::uniform_int_distribution<int> dist (1, inputSize*10);
+
+	std::iota (sourceList.begin(), sourceList.end(), idx++);
+
+	for (size_t i=0; i<input.size(); i++) {
+		idx			= dist(mt);
+		auto it		= sourceList.begin ();
+		std::advance (it, idx);
+		input[i]	= *it;
+		sourceList.erase (it);
 	}
-
-	target[i]	= *(source.end()-1);
-
-	//TSIKIN_PRINT_V ("Taken..", target, "");
-}
+}*/
 
 
 void findOutSeparators (IntVector &target, IntVector &source, int n) {
@@ -115,17 +181,15 @@ void findOutSeparators (IntVector &target, IntVector &source, int n) {
 }
 
 
-bool isSorted (IntVector &v) {
-	return false;
-}
-
-
 void setupBsp (BSP<int> &tAlg, int n, int p, int seed, IntVector &input,
 				std::vector<IntVector> &bspInputs, std::vector<IntVector> &bspOutputs) {
+	
+	UTimer bspTimer ("setupBsp");
+
 	std::random_device randomDevice;
 	input	= IntVector	(n);
 	createRandomVector (input, (seed==-1) ? randomDevice() : seed);
-	TSIKIN_PRINT_V ("Input vector", input, "\n");
+	//TSIKIN_PRINT_V ("Input vector", input, "\n");
 
 
 	bspInputs	= std::vector<IntVector> (p);
@@ -147,6 +211,7 @@ void setupBsp (BSP<int> &tAlg, int n, int p, int seed, IntVector &input,
 	// ============================================================
 	// Superstep 0
 
+	std::cout  << "Superstep 0\n";
 	BSP<int>::SuperstepPointer s0	= BSP<int>::SuperstepPointer (new Superstep<int> ());
 
 	for (int i= 0; i<p; i++) {
@@ -175,6 +240,7 @@ void setupBsp (BSP<int> &tAlg, int n, int p, int seed, IntVector &input,
 	// ============================================================
 	// Superstep 1 
 
+	std::cout  << "Superstep 1\n";
 	BSP<int>::SuperstepPointer s1	= BSP<int>::SuperstepPointer (new Superstep<int> ());
 
 	for (int i= 0; i<p; i++) {
@@ -192,9 +258,9 @@ void setupBsp (BSP<int> &tAlg, int n, int p, int seed, IntVector &input,
 				mapMutex.lock ();
 				std::vector<int> &pi	= s0VectorsMap[activityIndex];
 				mapMutex.unlock ();
-				int i					= 0;	// Index for 'pi' vector
-				int j					= 1;	// Index for 'separators' vector
-				int k					= 0;	// Index for 'cp' vector
+				size_t i				= 0;	// Index for 'pi' vector
+				size_t j				= 1;	// Index for 'separators' vector
+				size_t k				= 0;	// Index for 'cp' vector
 
 				while (i < pi.size()) {
 					cp[k]	= IntVector ();
@@ -220,6 +286,7 @@ void setupBsp (BSP<int> &tAlg, int n, int p, int seed, IntVector &input,
 	// ============================================================
 	// Superstep 2
 
+	std::cout  << "Superstep 2\n";
 	BSP<int>::SuperstepPointer s2	= BSP<int>::SuperstepPointer (new Superstep<int> ());
 
 	for (int i= 0; i<p; i++) {
@@ -244,26 +311,28 @@ void setupBsp (BSP<int> &tAlg, int n, int p, int seed, IntVector &input,
 
 
 int main (int argn, char **argv) {
-	std::string usageStr	= 	"Usage: ./bin/TsikinAlgorithm <n> <p> [seed]"
-								"\n\t\tn\tNumber of items contained in the vector to be ordered"
-								"\n\t\tp\tNumber of processor (parallel activities)"
-								"\n\t\tseed\tSeed to be given as arguments to generate random numbers";
+	std::string usageStr	= 	"Usage: ./bin/TsikinAlgorithm <n> <p> [-s seed] [-a]"
+								"\n\t\tn\t\tNumber of items contained in the vector to be ordered"
+								"\n\t\tp\t\tNumber of processor (parallel activities)"
+								"\n\t\t-s seed\t\tSeed to be given as arguments to generate random numbers"
+								"\n\t\t-a\t\tTry to set affinity for worker threads";
 
-	if (argn < 3 || argn > 4) {
+	Parameters parameters;
+
+	
+	if (!parseArgs (argn, argv, std::ref (parameters))) {
 		std::cerr << usageStr << std::endl;
 		return EXIT_FAILURE;
 	}
 
-	int n		= std::atoi (argv[1]);
-	int p		= std::atoi (argv[2]);
-	int seed	= (argn==4) ? std::atoi (argv[3]) : -1;
 
-	if (n%p != 0) {
-		std::cerr << "The length of vector must be multiple of number of processors!\n";
-		return EXIT_FAILURE;
-	}
+	int n			= std::get<0> (parameters);
+	int p			= std::get<1> (parameters);
+	int seed		= std::get<2> (parameters);
+	bool affinity	= std::get<3> (parameters);
 
-	//std::cout << "Input args ==>   n: " << n << "\tp: " << p << "\tseed: " << seed << std::endl;
+	std::cout << "Using a vector of   size " << n << "   and   "  << p << " processors,  "
+					" with   seed=" << seed << "   and   affinity=" << affinity << std::endl << std::endl;
 
 	BSP<int> tsikinAlgorithm;
 	IntVector unorderedVector;
@@ -273,21 +342,25 @@ int main (int argn, char **argv) {
 
 	setupBsp (std::ref(tsikinAlgorithm), n, p, seed, std::ref(unorderedVector), std::ref(bspInput), std::ref(bspOutput));
 
-	tsikinAlgorithm.runAndWait (std::ref(bspInput), std::ref(bspOutput));
+	std::cout << "Starting computation..\n";
+	{
+		UTimer computationTimer ("Algorithm computation");
+		tsikinAlgorithm.runAndWait (std::ref(bspInput), std::ref(bspOutput), affinity);
+	}
 
-	std::cout << "Output vector:\n";
+	//std::cout << "Output vector:\n";
 	for (auto out : bspOutput) {
 		orderedVector.insert (orderedVector.end(), out.begin(), out.end());
-		/*for (auto el : out) {
-			std::cout << el << " ";
-		}*/
 	}
-	for (auto el : orderedVector)
+	/*for (auto el : orderedVector)
 		std::cout << el << " ";
-	std::cout << std::endl << std::endl;
+	std::cout << std::endl << std::endl;*/
 
-	std::cout << "Sorted?  " << (std::is_sorted (orderedVector.begin(), orderedVector.end()) ? "YES!\n" : "NO!\n");
 
+	{
+		UTimer computationTimer ("C++ sort algorithm");
+		std::cout << "Sorted?  " << (std::is_sorted (orderedVector.begin(), orderedVector.end()) ? "YES!\n" : "NO!\n");
+	}
 
 
 	return EXIT_SUCCESS;

@@ -8,13 +8,6 @@
 #ifndef SUPERSTEP_HPP
 #define SUPERSTEP_HPP
 
-#define PRINT_VECTOR(label, v, suffix) {\
-	std::cout << label << "\n";\
-	for (auto el : v)\
-		std::cout << el << "\t";\
-	std::cout << suffix;\
-}
-
 #include <workerThread.hpp>
 #include <barrier.hpp>
 #include <lockableVector.hpp>
@@ -22,7 +15,6 @@
 #include <list>
 #include <algorithm>
 #include <numeric>
-#include <iostream>		// REMOVE ME AFTER TESTS
 
 
 

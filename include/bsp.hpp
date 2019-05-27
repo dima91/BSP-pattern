@@ -12,13 +12,7 @@
 #include <superstep.hpp>
 
 #include <vector>
-
-#define BSP_PRINT_V(lbl, vec, footer) {\
-	std::cout << lbl << std::endl;\
-	for (auto el : vec)\
-		std::cout << el << " ";\
-	std::cout << std::endl << footer;\
-}
+#include <iostream>
 
 
 
@@ -34,7 +28,7 @@ private:
 	std::vector<WorkerThread> workers;
 	std::vector<SuperstepPointer> supersteps;
 
-	void setupWorkers ();
+	void setupWorkers (bool setAffinity);
 	void swapVectors (std::vector<std::vector<T>> &a, std::vector<LockableVector<T>> &b);
 
 
@@ -45,7 +39,7 @@ public:
 
 	int addSuperstep (SuperstepPointer step);
 
-	void runAndWait (std::vector<std::vector<T>> &input, std::vector<std::vector<T>> &ouput);
+	void runAndWait (std::vector<std::vector<T>> &input, std::vector<std::vector<T>> &ouput, bool setAffinity);
 };
 
 
@@ -83,7 +77,7 @@ int BSP<T>::addSuperstep (SuperstepPointer step) {
 
 
 template<typename T>
-void BSP<T>::setupWorkers () {
+void BSP<T>::setupWorkers (bool setAffinity) {
 	int maxActivities	= 0;
 	for (size_t i=0; i<supersteps.size(); i++) {
 		int tmpNum		= supersteps[i]->getActivitiesNumber();
@@ -91,6 +85,18 @@ void BSP<T>::setupWorkers () {
 	};
 
 	workers	= std::vector<WorkerThread> (maxActivities);
+
+	if (setAffinity) {
+		unsigned int cpusNum	= std::thread::hardware_concurrency();
+		
+		if ((int) cpusNum < maxActivities)
+			std::cout << "WARNING!\tTrying to set affinity for workers which number is greater than number of CPUs!\n";
+		
+		int idx	= 0;
+		std::for_each (workers.begin(), workers.end(), [&idx, cpusNum] (WorkerThread &w) {
+			w.setAffinity ((idx++) % cpusNum);
+		});
+	}
 }
 
 
@@ -112,12 +118,14 @@ void BSP<T>::swapVectors (std::vector<std::vector<T>> &a, std::vector<LockableVe
 
 
 template<typename T>
-void BSP<T>::runAndWait (std::vector<std::vector<T>> &input, std::vector<std::vector<T>> &output) {
+void BSP<T>::runAndWait (std::vector<std::vector<T>> &input, std::vector<std::vector<T>> &output, bool setAffinity) {
 	int retVal		= 0;
 	int nextStep	= 0;
 	std::vector<LockableVector<T>> lockableVectors (output.size());
 
-	setupWorkers ();
+	setupWorkers (setAffinity);
+
+	//std::this_thread::sleep_for (std::chrono::seconds (4));
 
 	swapVectors (output, lockableVectors);
 
@@ -138,13 +146,7 @@ void BSP<T>::runAndWait (std::vector<std::vector<T>> &input, std::vector<std::ve
 		}
 	}
 
-	/*BSP_PRINT_V ("Out_0", input[0], "")
-	BSP_PRINT_V ("Out_1", input[1], "")
-	BSP_PRINT_V ("Out_2", input[2], "\n")*/
 	
-
-
-	//output	= input;
 	std::swap (output, input);
 }
 

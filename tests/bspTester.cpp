@@ -98,7 +98,7 @@ int main (int argn, char **argv) {
 		std::cout << std::endl;
 	}
 
-	bspPattern.runAndWait (inputVectors, outputVectors);
+	bspPattern.runAndWait (inputVectors, outputVectors, false);
 
 
 

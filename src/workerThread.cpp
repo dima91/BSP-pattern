@@ -92,3 +92,16 @@ void WorkerThread::stopWorker () {
 	stopMe	= true;
 	taskCV.notify_all ();
 }
+
+
+
+
+void WorkerThread::setAffinity (unsigned int idx) {
+	cpu_set_t cpuset;
+	CPU_ZERO (&cpuset);
+	CPU_SET (idx, &cpuset);
+	
+	if (pthread_setaffinity_np (workerThread.native_handle(), sizeof(cpu_set_t), &cpuset) != 0) {
+		throw std::logic_error ("Error setting affinity to processor  " + std::to_string(idx));
+	}
+}

@@ -96,7 +96,7 @@ void setupBsp (BSP<int> &tt, std::vector<int> &input, std::vector<std::vector<in
 
 	BSP<int>::SuperstepPointer s1	= BSP<int>::SuperstepPointer (new Superstep<int> ());
 
-	for (int i : {0, 1, 2}) {
+	for (size_t i : {0, 1, 2}) {
 		s1->addActivity (
 			[] (int activityIndex, std::vector<int> &actInput) {
 				std::sort (actInput.begin(), actInput.end());
@@ -106,7 +106,7 @@ void setupBsp (BSP<int> &tt, std::vector<int> &input, std::vector<std::vector<in
 				mapMutex.lock ();
 				std::vector<int> &pi	= vectorsMap[activityIndex];
 				mapMutex.unlock ();
-				int i					= 0;
+				size_t i				= 0;
 				
 				//cp[0]	= std::vector<int> ();
 				while (pi[i] <= 30 && i<pi.size()) {
@@ -190,7 +190,7 @@ int main (int argn, char **argv) {
 			std::cout << el << " ";
 	}
 
-	tsikinTrial.runAndWait (std::ref(bspInputs), std::ref(bspOutputs));
+	tsikinTrial.runAndWait (std::ref(bspInputs), std::ref(bspOutputs), false);
 
 	std::cout << "\n\n============================================================\n\n";
 	/*PRINT_V ("First_O", bspOutputs[0], "");

@@ -25,9 +25,10 @@ public:
 	~UTimer () {
 		stop		= std::chrono::system_clock::now();
 		elapsedTime	= stop - start;
-		auto musec	= std::chrono::duration_cast<usecs>(elapsedTime).count();
+		auto usec	= std::chrono::duration_cast<usecs>(elapsedTime).count();
+		auto msec	= std::chrono::duration_cast<msecs>(elapsedTime).count();
 		
-		std::cout << message << " computed in " << musec << " usec " << std::endl;
+		std::cout << message << " computed in " << usec << " usec  (" << msec << " milliseconds)" << std::endl;
 
 	}
 };

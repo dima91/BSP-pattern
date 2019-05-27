@@ -11,7 +11,6 @@
 #include <vector>
 #include <mutex>
 #include <condition_variable>
-#include <iostream>				// FIXME REMOVE ME
 
 // Forward class declaration
 template<typename T>
