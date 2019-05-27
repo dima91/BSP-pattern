@@ -13,8 +13,9 @@
 #include <lockableVector.hpp>
 
 #include <list>
-#include <algorithm>
 #include <numeric>
+#include <algorithm>
+#include <iostream> // FIXME REMOVE ME AFTER TESTS
 
 
 

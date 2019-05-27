@@ -148,6 +148,10 @@ void BSP<T>::runAndWait (std::vector<std::vector<T>> &input, std::vector<std::ve
 
 	
 	std::swap (output, input);
+
+	std::for_each (workers.begin(), workers.end(), [] (WorkerThread &w) {
+		w.stopWorker ();
+	});
 }
 
 

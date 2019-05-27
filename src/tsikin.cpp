@@ -184,34 +184,42 @@ void findOutSeparators (IntVector &target, IntVector &source, int n) {
 void setupBsp (BSP<int> &tAlg, int n, int p, int seed, IntVector &input,
 				std::vector<IntVector> &bspInputs, std::vector<IntVector> &bspOutputs) {
 	
-	UTimer bspTimer ("setupBsp");
-
 	std::random_device randomDevice;
 	input	= IntVector	(n);
-	createRandomVector (input, (seed==-1) ? randomDevice() : seed);
+	
+	{
+		UTimer randomVector ("Creating random vector");
+		createRandomVector (input, (seed==-1) ? randomDevice() : seed);
+	}
 	//TSIKIN_PRINT_V ("Input vector", input, "\n");
 
 
-	bspInputs	= std::vector<IntVector> (p);
-	bspOutputs	= std::vector<IntVector> (p);
+	{
+		UTimer bspInputVectors ("Creating BSP input vectors");
+		
+		bspInputs	= std::vector<IntVector> (p);
+		bspOutputs	= std::vector<IntVector> (p);
 
-	int actInputLen	= n/p;
-	for (int i=0; i<p; i++) {
-		bspInputs[i]	= std::vector<int> (actInputLen);
-		auto &vI		= bspInputs[i];
-		for (int j=0; j<actInputLen; j++) {
-			vI[j]	= input[(actInputLen*i)+j];
+		int actInputLen	= n/p;
+		for (int i=0; i<p; i++) {
+			bspInputs[i]	= std::vector<int> (actInputLen);
+			auto &vI		= bspInputs[i];
+			for (int j=0; j<actInputLen; j++) {
+				vI[j]	= input[(actInputLen*i)+j];
+			}
+
+			//TSIKIN_PRINT_V ("Proc " << i << " input", bspInputs[i], "");
 		}
-
-		//TSIKIN_PRINT_V ("Proc " << i << " input", bspInputs[i], "");
 	}
+
+
+	UTimer superstepCreator ("Creating supersteps");
 
 
 	// ============================================================
 	// ============================================================
 	// Superstep 0
 
-	std::cout  << "Superstep 0\n";
 	BSP<int>::SuperstepPointer s0	= BSP<int>::SuperstepPointer (new Superstep<int> ());
 
 	for (int i= 0; i<p; i++) {
@@ -240,7 +248,6 @@ void setupBsp (BSP<int> &tAlg, int n, int p, int seed, IntVector &input,
 	// ============================================================
 	// Superstep 1 
 
-	std::cout  << "Superstep 1\n";
 	BSP<int>::SuperstepPointer s1	= BSP<int>::SuperstepPointer (new Superstep<int> ());
 
 	for (int i= 0; i<p; i++) {
@@ -286,7 +293,6 @@ void setupBsp (BSP<int> &tAlg, int n, int p, int seed, IntVector &input,
 	// ============================================================
 	// Superstep 2
 
-	std::cout  << "Superstep 2\n";
 	BSP<int>::SuperstepPointer s2	= BSP<int>::SuperstepPointer (new Superstep<int> ());
 
 	for (int i= 0; i<p; i++) {
@@ -335,32 +341,45 @@ int main (int argn, char **argv) {
 					" with   seed=" << seed << "   and   affinity=" << affinity << std::endl << std::endl;
 
 	BSP<int> tsikinAlgorithm;
+	IntVector cppUnorderedVector;
 	IntVector unorderedVector;
 	IntVector orderedVector;
 	std::vector<IntVector> bspInput;
 	std::vector<IntVector> bspOutput;
 
-	setupBsp (std::ref(tsikinAlgorithm), n, p, seed, std::ref(unorderedVector), std::ref(bspInput), std::ref(bspOutput));
+	{;
+		std::cout << std::endl <<
+		 			"======================\n" <<
+					"Setting up environment\n";
+		UTimer environmentTimer ("Environment setup");
+		setupBsp (std::ref(tsikinAlgorithm), n, p, seed, std::ref(unorderedVector), std::ref(bspInput), std::ref(bspOutput));	
+		cppUnorderedVector	= unorderedVector;
+	}
 
-	std::cout << "Starting computation..\n";
 	{
+		std::cout << std::endl <<
+				 	"====================\n" <<
+					"Starting computation\n";
 		UTimer computationTimer ("Algorithm computation");
 		tsikinAlgorithm.runAndWait (std::ref(bspInput), std::ref(bspOutput), affinity);
 	}
 
-	//std::cout << "Output vector:\n";
 	for (auto out : bspOutput) {
 		orderedVector.insert (orderedVector.end(), out.begin(), out.end());
 	}
-	/*for (auto el : orderedVector)
-		std::cout << el << " ";
-	std::cout << std::endl << std::endl;*/
 
 
-	{
-		UTimer computationTimer ("C++ sort algorithm");
-		std::cout << "Sorted?  " << (std::is_sorted (orderedVector.begin(), orderedVector.end()) ? "YES!\n" : "NO!\n");
+	try {
+		std::cout << std::endl <<
+				 	"=====================\n" <<
+					"C++ sorting algorithm\n";
+		UTimer cppTimer ("C++ sort algorithm");
+		std::sort (cppUnorderedVector.begin(), cppUnorderedVector.end());
+	} catch (std::runtime_error &e) {
+		std::cerr << "Catched an exception! " << e.what() << std::endl;
 	}
+
+	std::cout << "Bye!\n";
 
 
 	return EXIT_SUCCESS;
