@@ -15,6 +15,9 @@
 #include <algorithm>
 
 
+#define CPP_UNORDERED_VECTOR
+
+
 //#define SHARED_PTR
 #ifdef SHARED_PTR
 	using el_t	= std::shared_ptr<int>;
@@ -366,7 +369,7 @@ int main (int argn, char **argv) {
 					" with   seed=" << seed << "   and   affinity=" << affinity << std::endl << std::endl;
 
 	BSP<el_t> tsikinAlgorithm;
-	//IntVector cppUnorderedVector;
+	IntVector cppUnorderedVector;
 	IntVector unorderedVector;
 	IntVector orderedVector;
 	std::vector<IntVector> bspInput;
@@ -378,7 +381,9 @@ int main (int argn, char **argv) {
 					"Setting up environment\n";
 		UTimer environmentTimer ("Environment setup");
 		setupBsp (std::ref(tsikinAlgorithm), n, p, seed, std::ref(unorderedVector), std::ref(bspInput), std::ref(bspOutput));	
-		//cppUnorderedVector	= unorderedVector;
+		#ifdef CPP_UNORDERED_VECTOR
+		cppUnorderedVector	= unorderedVector;
+		#endif
 	}
 
 	{
@@ -397,7 +402,8 @@ int main (int argn, char **argv) {
 	TSIKIN_PRINT_V ("Output vector", orderedVector, "");
 
 
-	/*try {
+	#ifdef CPP_UNORDERED_VECTOR
+	try {
 		std::cout << std::endl <<
 				 	"=====================\n" <<
 					"C++ sorting algorithm\n";
@@ -405,7 +411,8 @@ int main (int argn, char **argv) {
 		std::sort (cppUnorderedVector.begin(), cppUnorderedVector.end());
 	} catch (std::runtime_error &e) {
 		std::cerr << "Catched an exception! " << e.what() << std::endl;
-	}*/
+	}
+	#endif
 
 	std::cout << "Bye!\n";
 
