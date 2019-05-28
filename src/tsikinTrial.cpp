@@ -1,6 +1,6 @@
 /**
- * \file tsikinTrial.cpp
- * \brief Main file containing a "static" implementation of Tsikin sorting algorithm.
+ * \file tiskinTrial.cpp
+ * \brief Main file containing a "static" implementation of Tiskin sorting algorithm.
  * \author Luca Di Mauro
  */
 
@@ -168,9 +168,9 @@ void setupBsp (BSP<int> &tt, std::vector<int> &input, std::vector<std::vector<in
 
 
 int main (int argn, char **argv) {
-	std::cout << "Hwllo user! Welcome to 'static' implementation of Tsikin alogirthm\n\n";
+	std::cout << "Hwllo user! Welcome to 'static' implementation of Tiskin alogirthm\n\n";
 	
-	BSP<int> tsikinTrial;
+	BSP<int> tiskinTrial;
 	int n	= 21;					// Number of element in the array
 	//int p	= 3;					// Number of concurrent activities
 	std::vector<int> input (n);		// Array containing input elements
@@ -178,7 +178,7 @@ int main (int argn, char **argv) {
 	std::vector<std::vector<int>> bspInputs;
 	std::vector<std::vector<int>> bspOutputs;
 
-	setupBsp (tsikinTrial, std::ref(input), std::ref(bspInputs), std::ref(bspOutputs));
+	setupBsp (tiskinTrial, std::ref(input), std::ref(bspInputs), std::ref(bspOutputs));
 
 	/*PRINT_V ("First_I", bspInputs[0], "");
 	PRINT_V ("Second_I", bspInputs[1], "");
@@ -190,7 +190,7 @@ int main (int argn, char **argv) {
 			std::cout << el << " ";
 	}
 
-	tsikinTrial.runAndWait (std::ref(bspInputs), std::ref(bspOutputs), false);
+	tiskinTrial.runAndWait (std::ref(bspInputs), std::ref(bspOutputs), false);
 
 	std::cout << "\n\n============================================================\n\n";
 	/*PRINT_V ("First_O", bspOutputs[0], "");

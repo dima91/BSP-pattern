@@ -1,6 +1,6 @@
 /**
- * \file tsikin.cpp
- * \brief Main file containing the implementation of Tsikin sorting algorithm.
+ * \file tiskin.cpp
+ * \brief Main file containing the implementation of Tiskin sorting algorithm.
  * \author Luca Di Mauro
  */
 
@@ -28,7 +28,7 @@
 
 //#define DEBUG
 #ifdef DEBUG
-	#define TSIKIN_PRINT_V(lbl, vec, footer) {\
+	#define TISKIN_PRINT_V(lbl, vec, footer) {\
 		std::unique_lock<std::mutex> lock (outputMutex);\
 		std::cout << lbl << std::endl;\
 		for (auto el : vec)\
@@ -36,7 +36,7 @@
 		std::cout << std::endl << footer;\
 	}
 #else
-	#define TSIKIN_PRINT_V(lbl, vec, footer) {}
+	#define TISKIN_PRINT_V(lbl, vec, footer) {}
 #endif
 
 
@@ -55,8 +55,8 @@ std::mutex mapMutex;
 
 bool parseArgs (int argn, char **argv, Parameters &params) {
 	//           0        1  2  3  4  5
-	// ./tsikinAlgorithm 256 8 -s 10 -a
-	// ./tsikinAlgorithm 256 8 -a -s 10
+	// ./tiskinAlgorithm 256 8 -s 10 -a
+	// ./tiskinAlgorithm 256 8 -a -s 10
 	if (argn < 3 || argn > 6) {
 		return false;
 	}
@@ -242,7 +242,7 @@ void setupBsp (BSP<el_t> &tAlg, int n, int p, int seed, IntVector &input,
 		UTimer randomVector ("Creating random vector");
 		createRandomVector (input, (seed==-1) ? randomDevice() : seed, p);
 	}
-	TSIKIN_PRINT_V ("Input vector", input, "\n");
+	TISKIN_PRINT_V ("Input vector", input, "\n");
 
 
 	{
@@ -259,7 +259,7 @@ void setupBsp (BSP<el_t> &tAlg, int n, int p, int seed, IntVector &input,
 				vI[j]	= input[(actInputLen*i)+j];
 			}
 
-			//TSIKIN_PRINT_V ("Proc " << i << " input", bspInputs[i], "");
+			//TISKIN_PRINT_V ("Proc " << i << " input", bspInputs[i], "");
 		}
 	}
 
@@ -306,9 +306,9 @@ void setupBsp (BSP<el_t> &tAlg, int n, int p, int seed, IntVector &input,
 	for (int i= 0; i<p; i++) {
 		s1->addActivity (
 			[] (int activityIndex, IntVector &actInput) {
-				//TSIKIN_PRINT_V ("Input " << activityIndex, actInput, "");
+				//TISKIN_PRINT_V ("Input " << activityIndex, actInput, "");
 				std::sort (actInput.begin(), actInput.end());
-				//TSIKIN_PRINT_V ("Output " << activityIndex, actInput, "");
+				//TISKIN_PRINT_V ("Output " << activityIndex, actInput, "");
 			},
 			([p] (int activityIndex, IntVector &commElements) {
 				std::vector<IntVector> cp (p);
@@ -370,7 +370,7 @@ void setupBsp (BSP<el_t> &tAlg, int n, int p, int seed, IntVector &input,
 
 
 int main (int argn, char **argv) {
-	std::string usageStr	= 	"Usage: ./bin/TsikinAlgorithm <n> <p> [-s seed] [-a]"
+	std::string usageStr	= 	"Usage: ./bin/TiskinAlgorithm <n> <p> [-s seed] [-a]"
 								"\n\t\tn\t\tNumber of items contained in the vector to be ordered"
 								"\n\t\tp\t\tNumber of processor (parallel activities)"
 								"\n\t\t-s seed\t\tSeed to be given as arguments to generate random numbers"
@@ -393,7 +393,7 @@ int main (int argn, char **argv) {
 	std::cout << "Using a vector of   size " << n << "   and   "  << p << " processors,  "
 					" with   seed=" << seed << "   and   affinity=" << affinity << std::endl << std::endl;
 
-	BSP<el_t> tsikinAlgorithm;
+	BSP<el_t> tiskinAlgorithm;
 	IntVector cppUnorderedVector;
 	IntVector unorderedVector;
 	IntVector orderedVector;
@@ -405,7 +405,7 @@ int main (int argn, char **argv) {
 		 			"======================\n" <<
 					"Setting up environment\n";
 		UTimer environmentTimer ("Environment setup");
-		setupBsp (std::ref(tsikinAlgorithm), n, p, seed, std::ref(unorderedVector), std::ref(bspInput), std::ref(bspOutput));	
+		setupBsp (std::ref(tiskinAlgorithm), n, p, seed, std::ref(unorderedVector), std::ref(bspInput), std::ref(bspOutput));	
 		#ifdef CPP_UNORDERED_VECTOR
 		cppUnorderedVector	= unorderedVector;
 		#endif
@@ -416,7 +416,7 @@ int main (int argn, char **argv) {
 				 	"====================\n" <<
 					"Starting computation\n";
 		UTimer computationTimer ("Whole algorithm");
-		tsikinAlgorithm.runAndWait (std::ref(bspInput), std::ref(bspOutput), affinity);
+		tiskinAlgorithm.runAndWait (std::ref(bspInput), std::ref(bspOutput), affinity);
 		std::cout << std::endl << std::endl;
 	}
 
@@ -424,7 +424,7 @@ int main (int argn, char **argv) {
 		orderedVector.insert (orderedVector.end(), out.begin(), out.end());
 	}
 	std::cout << "\nSorted?  " << ((std::is_sorted (orderedVector.begin(), orderedVector.end())) ? "YES" : "NO") << std::endl;
-	TSIKIN_PRINT_V ("Output vector", orderedVector, "");
+	TISKIN_PRINT_V ("Output vector", orderedVector, "");
 
 
 	#ifdef CPP_UNORDERED_VECTOR

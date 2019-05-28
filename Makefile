@@ -4,7 +4,7 @@ BIN_DIR	= bin
 OBJ_DIR	= obj
 CC		= g++
 CFLAGS	= -I include -lpthread -Wall -pedantic -O3 -std=c++11
-EXECS	= ${BIN_DIR}/TsikinAlgorithm ${BIN_DIR}/TsikinTrial
+EXECS	= ${BIN_DIR}/TiskinAlgorithm ${BIN_DIR}/TiskinTrial
 TESTS	= ${BIN_DIR}/QueueTester ${BIN_DIR}/BarrierTester ${BIN_DIR}/WorkerTester ${BIN_DIR}/LockableVectorTester ${BIN_DIR}/SuperstepTester ${BIN_DIR}/BspTester
 OBJS	= ${OBJ_DIR}/barrier.o ${OBJ_DIR}/workerThread.o
 
@@ -17,11 +17,11 @@ all :
 
 
 
-${BIN_DIR}/TsikinAlgorithm : src/tsikin.cpp include/*.hpp ${OBJS}
+${BIN_DIR}/TiskinAlgorithm : src/tiskin.cpp include/*.hpp ${OBJS}
 	${CC} -o $@  $< ${OBJ_DIR}/*.o ${CFLAGS}
 
 
-${BIN_DIR}/TsikinTrial : src/tsikinTrial.cpp include/*.hpp ${OBJS}
+${BIN_DIR}/TiskinTrial : src/tiskinTrial.cpp include/*.hpp ${OBJS}
 	${CC} -o $@ $< ${OBJ_DIR}/*.o ${CFLAGS}
 
 

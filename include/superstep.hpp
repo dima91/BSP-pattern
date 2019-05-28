@@ -15,7 +15,7 @@
 #include <list>
 #include <numeric>
 #include <algorithm>
-#include <iostream> // FIXME REMOVE ME AFTER TESTS
+//#include <iostream> // FIXME REMOVE ME AFTER TESTS
 #include <future> // FIXME REMOVE ME AFTER TESTS
 
 
@@ -168,7 +168,6 @@ int Superstep<T>::runStep (std::vector<WorkerThread> &workers,
 
 	// Setting up worker threads
 	for (size_t i=0; i<activitiesFunctions.size(); i++) {
-
 		// Bind packaged task to arguments
 		auto lambdaFunction	= [&] (int index, std::vector<T> &inputItems, std::vector<LockableVector<T>> &outputItems) {
 			workerFunction (index, inputItems, outputItems);
@@ -181,7 +180,7 @@ int Superstep<T>::runStep (std::vector<WorkerThread> &workers,
 	}
 
 	/*auto barrierPtr	= &commPhaseBarrier;
-	auto asyncWork	= std::async (std::launch::async, [barrierPtr, stop] () {
+	auto asyncWork	= std::async (std::launch::async, [barrierPtr] () {
 		while (barrierPtr->getRemainingEntities())  {
 			std::this_thread::sleep_for (std::chrono::seconds (2));
 			std::cout << "RW: " << barrierPtr->getRemainingEntities() << std::endl;
