@@ -15,8 +15,15 @@
 #include <algorithm>
 
 
-#define DEBUG
+//#define SHARED_PTR
+#ifdef SHARED_PTR
+	using el_t	= std::shared_ptr<int>;
+#else
+	using el_t	= int;
+#endif
 
+
+//#define DEBUG
 #ifdef DEBUG
 	#define TSIKIN_PRINT_V(lbl, vec, footer) {\
 		std::unique_lock<std::mutex> lock (outputMutex);\
@@ -30,9 +37,9 @@
 #endif
 
 
-using IntVector					= std::vector<int>;
-using IntCommunicationProtocol	= Superstep<int>::CommunicationProtocol;
-using CommunicationProtocolFun	= std::function<IntCommunicationProtocol (std::vector<int> &)>;
+using IntVector					= std::vector<el_t>;
+using IntCommunicationProtocol	= Superstep<el_t>::CommunicationProtocol;
+using CommunicationProtocolFun	= std::function<IntCommunicationProtocol (IntVector &)>;
 using Parameters				= std::tuple<int, int, int, bool>;
 
 
@@ -105,18 +112,36 @@ bool parseArgs (int argn, char **argv, Parameters &params) {
 
 
 
-void createRandomVector (IntVector &input, int seed) {
-	int idx	= 0;
-	std::mt19937 mt (seed);
-	std::uniform_int_distribution<int> dist (0, input.size());
+void createRandomVector (IntVector &input, int seed, int parDeg) {
+#if 1
+	auto threadFun	= [&input] (int startIdx, int endIdx, int startInt) {
+		//std::cout << "Filling vector from " << startIdx << " to " << endIdx << " with values from " << startInt << std::endl;
+		while (startIdx!=endIdx) {
+			input[startIdx]	= startInt++;
+			startIdx++;
+		}
+	};
+
+	std::vector<std::thread> threadV (4);
+	int offset		= input.size() / threadV.size();
+	int startInt	= 0;
+	for (size_t i=0; i<threadV.size(); i++) {
+		threadV[i]	= std::thread (threadFun, (i*offset), ((i+1)*offset), startInt+(i*offset));
+	}
+
+	for (auto &t : threadV)
+		t.join ();
+#else
+	int idx	= 1966;
 	std::iota (input.begin(), input.end(), idx++);
+#endif
 
 	std::random_shuffle (input.begin(), input.end());
 }
 
 
 
-/*void createRandomVector (IntVector &input, int seed) {
+/*void createRandomVector (IntVector &input, int seed, int parDeg) {
 	std::mt19937 mt (seed);
 	std::uniform_int_distribution<int> dist (1, input.size()*10);
 	int nextInt	= 0;
@@ -132,7 +157,7 @@ void createRandomVector (IntVector &input, int seed) {
 
 
 
-/*void createRandomVector (IntVector &input, int seed) {
+/*void createRandomVector (IntVector &input, int seed, int parDeg) {
 	int idx			= 0;
 	int inputSize	= input.size ();
 	std::list<int> sourceList (inputSize*10);
@@ -181,7 +206,7 @@ void findOutSeparators (IntVector &target, IntVector &source, int n) {
 }
 
 
-void setupBsp (BSP<int> &tAlg, int n, int p, int seed, IntVector &input,
+void setupBsp (BSP<el_t> &tAlg, int n, int p, int seed, IntVector &input,
 				std::vector<IntVector> &bspInputs, std::vector<IntVector> &bspOutputs) {
 	
 	std::random_device randomDevice;
@@ -189,9 +214,9 @@ void setupBsp (BSP<int> &tAlg, int n, int p, int seed, IntVector &input,
 	
 	{
 		UTimer randomVector ("Creating random vector");
-		createRandomVector (input, (seed==-1) ? randomDevice() : seed);
+		createRandomVector (input, (seed==-1) ? randomDevice() : seed, p);
 	}
-	//TSIKIN_PRINT_V ("Input vector", input, "\n");
+	TSIKIN_PRINT_V ("Input vector", input, "\n");
 
 
 	{
@@ -202,7 +227,7 @@ void setupBsp (BSP<int> &tAlg, int n, int p, int seed, IntVector &input,
 
 		int actInputLen	= n/p;
 		for (int i=0; i<p; i++) {
-			bspInputs[i]	= std::vector<int> (actInputLen);
+			bspInputs[i]	= IntVector (actInputLen);
 			auto &vI		= bspInputs[i];
 			for (int j=0; j<actInputLen; j++) {
 				vI[j]	= input[(actInputLen*i)+j];
@@ -220,20 +245,20 @@ void setupBsp (BSP<int> &tAlg, int n, int p, int seed, IntVector &input,
 	// ============================================================
 	// Superstep 0
 
-	BSP<int>::SuperstepPointer s0	= BSP<int>::SuperstepPointer (new Superstep<int> ());
+	BSP<el_t>::SuperstepPointer s0	= BSP<el_t>::SuperstepPointer (new Superstep<el_t> ());
 
 	for (int i= 0; i<p; i++) {
 		s0->addActivity (
-			[] (int activityIndex, std::vector<int> &actInput) {
+			[] (int activityIndex, IntVector &actInput) {
 				std::sort (actInput.begin(), actInput.end());
 				s0VectorsMap[activityIndex]	= actInput;
 			},
-			[p] (int activityIndex, std::vector<int> &elements) {
-				Superstep<int>::CommunicationProtocol cp (p);
-				cp[0]	= std::vector<int> (p+1);
+			[p] (int activityIndex, IntVector &elements) {
+				IntCommunicationProtocol cp (p);
+				cp[0]	= IntVector (p+1);
 				findOutSeparators (std::ref(cp[0]), std::ref(elements), p+1);
 				for (int i=1; i<p; i++) {
-					cp[i]	= std::vector<int> (p+1);
+					cp[i]	= IntVector (p+1);
 					cp[i]	= cp[0];
 				}
 				return cp;
@@ -248,22 +273,22 @@ void setupBsp (BSP<int> &tAlg, int n, int p, int seed, IntVector &input,
 	// ============================================================
 	// Superstep 1 
 
-	BSP<int>::SuperstepPointer s1	= BSP<int>::SuperstepPointer (new Superstep<int> ());
+	BSP<el_t>::SuperstepPointer s1	= BSP<el_t>::SuperstepPointer (new Superstep<el_t> ());
 
 	for (int i= 0; i<p; i++) {
 		s1->addActivity (
-			[] (int activityIndex, std::vector<int> &actInput) {
+			[] (int activityIndex, IntVector &actInput) {
 				//TSIKIN_PRINT_V ("Input " << activityIndex, actInput, "");
 				std::sort (actInput.begin(), actInput.end());
 				//TSIKIN_PRINT_V ("Output " << activityIndex, actInput, "");
 			},
-			([p] (int activityIndex, std::vector<int> &commElements) {
+			([p] (int activityIndex, IntVector &commElements) {
 				std::vector<IntVector> cp (p);
 				IntVector separators (p+1);
 				findOutSeparators (std::ref(separators), std::ref(commElements), p+1);
 				
 				mapMutex.lock ();
-				std::vector<int> &pi	= s0VectorsMap[activityIndex];
+				IntVector &pi	= s0VectorsMap[activityIndex];
 				mapMutex.unlock ();
 				size_t i				= 0;	// Index for 'pi' vector
 				size_t j				= 1;	// Index for 'separators' vector
@@ -293,15 +318,15 @@ void setupBsp (BSP<int> &tAlg, int n, int p, int seed, IntVector &input,
 	// ============================================================
 	// Superstep 2
 
-	BSP<int>::SuperstepPointer s2	= BSP<int>::SuperstepPointer (new Superstep<int> ());
+	BSP<el_t>::SuperstepPointer s2	= BSP<el_t>::SuperstepPointer (new Superstep<el_t> ());
 
 	for (int i= 0; i<p; i++) {
 		s2->addActivity (
-			[] (int activityIndex, std::vector<int> &actInput) {
+			[] (int activityIndex, IntVector &actInput) {
 				std::sort (actInput.begin(), actInput.end());
 			},
-			([p] (int activityIndex, std::vector<int> &elements) {
-				std::vector<std::vector<int>> cp (p);
+			([p] (int activityIndex, IntVector &elements) {
+				std::vector<IntVector> cp (p);
 				for (auto el: elements) {
 					cp[activityIndex].push_back (el);
 				}
@@ -340,8 +365,8 @@ int main (int argn, char **argv) {
 	std::cout << "Using a vector of   size " << n << "   and   "  << p << " processors,  "
 					" with   seed=" << seed << "   and   affinity=" << affinity << std::endl << std::endl;
 
-	BSP<int> tsikinAlgorithm;
-	IntVector cppUnorderedVector;
+	BSP<el_t> tsikinAlgorithm;
+	//IntVector cppUnorderedVector;
 	IntVector unorderedVector;
 	IntVector orderedVector;
 	std::vector<IntVector> bspInput;
@@ -353,23 +378,26 @@ int main (int argn, char **argv) {
 					"Setting up environment\n";
 		UTimer environmentTimer ("Environment setup");
 		setupBsp (std::ref(tsikinAlgorithm), n, p, seed, std::ref(unorderedVector), std::ref(bspInput), std::ref(bspOutput));	
-		cppUnorderedVector	= unorderedVector;
+		//cppUnorderedVector	= unorderedVector;
 	}
 
 	{
 		std::cout << std::endl <<
 				 	"====================\n" <<
 					"Starting computation\n";
-		UTimer computationTimer ("Algorithm computation");
+		UTimer computationTimer ("Whole algorithm");
 		tsikinAlgorithm.runAndWait (std::ref(bspInput), std::ref(bspOutput), affinity);
+		std::cout << std::endl << std::endl;
 	}
 
 	for (auto out : bspOutput) {
 		orderedVector.insert (orderedVector.end(), out.begin(), out.end());
 	}
+	std::cout << "\nSorted?  " << ((std::is_sorted (orderedVector.begin(), orderedVector.end())) ? "YES" : "NO") << std::endl;
+	TSIKIN_PRINT_V ("Output vector", orderedVector, "");
 
 
-	try {
+	/*try {
 		std::cout << std::endl <<
 				 	"=====================\n" <<
 					"C++ sorting algorithm\n";
@@ -377,7 +405,7 @@ int main (int argn, char **argv) {
 		std::sort (cppUnorderedVector.begin(), cppUnorderedVector.end());
 	} catch (std::runtime_error &e) {
 		std::cerr << "Catched an exception! " << e.what() << std::endl;
-	}
+	}*/
 
 	std::cout << "Bye!\n";
 

@@ -10,6 +10,7 @@
 
 #include <workerThread.hpp>
 #include <superstep.hpp>
+#include <uTimer.hpp>
 
 #include <vector>
 #include <iostream>
@@ -131,18 +132,26 @@ void BSP<T>::runAndWait (std::vector<std::vector<T>> &input, std::vector<std::ve
 
 	while (retVal != EOCFlag && nextStep < (int) supersteps.size()) {
 
-		retVal	= supersteps[nextStep]->runStep (workers, input, lockableVectors);
+		{
+			UTimer timer ("Superstep " + std::to_string (nextStep));
+			std::cout << "Running superstep  " << nextStep << std::endl;
+			retVal	= supersteps[nextStep]->runStep (workers, input, lockableVectors);
+		}
 
-		if (retVal == NextStepFlag) {
-			nextStep++;
-			swapVectors (input, lockableVectors);
-		}
-		else if (retVal == EOCFlag) {
-			swapVectors (input, lockableVectors);
-		}
-		else {
-			nextStep	= retVal;
-			swapVectors (input, lockableVectors);
+		{
+			UTimer timer ("Swap vectors");
+			std::cout << "Swapping vectors" << std::endl;
+			if (retVal == NextStepFlag) {
+				nextStep++;
+				swapVectors (input, lockableVectors);
+			}
+			else if (retVal == EOCFlag) {
+				swapVectors (input, lockableVectors);
+			}
+			else {
+				nextStep	= retVal;
+				swapVectors (input, lockableVectors);
+			}
 		}
 	}
 

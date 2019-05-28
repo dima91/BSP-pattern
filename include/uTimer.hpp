@@ -4,6 +4,9 @@
 #include <thread>
 #include <ctime>
 
+#ifndef U_TIMER_HPP
+#define U_TIMER_HPP
+
 
 class UTimer {
 private:
@@ -32,3 +35,6 @@ public:
 
 	}
 };
+
+
+#endif // U_TIMER_HPP
