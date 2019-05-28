@@ -180,21 +180,18 @@ int Superstep<T>::runStep (std::vector<WorkerThread> &workers,
 		workers[i].assignActivity (std::move(packagedTask));
 	}
 
-	auto barrierPtr	= &commPhaseBarrier;
-	bool stop		= false;
-
+	/*auto barrierPtr	= &commPhaseBarrier;
 	auto asyncWork	= std::async (std::launch::async, [barrierPtr, stop] () {
 		while (barrierPtr->getRemainingEntities())  {
 			std::this_thread::sleep_for (std::chrono::seconds (2));
 			std::cout << "RW: " << barrierPtr->getRemainingEntities() << std::endl;
 		}
-	});
+	});*/
 
 	// Starting workers and waiting for their completion
 	startBarrier.decreaseBarrier ();
 	commPhaseBarrier.waitForFinish ();
-	stop = true;
-	asyncWork.get();
+	//asyncWork.get();
 	
 	return atExitF (outputVectors);
 }

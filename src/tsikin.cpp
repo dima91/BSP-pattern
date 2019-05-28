@@ -22,7 +22,7 @@
 #ifdef SHARED_PTR
 	using el_t	= std::shared_ptr<int>;
 #else
-	using el_t	= int;
+	using el_t	= double;
 #endif
 
 
@@ -116,30 +116,13 @@ bool parseArgs (int argn, char **argv, Parameters &params) {
 
 
 void createRandomVector (IntVector &input, int seed, int parDeg) {
-#if 1
-	auto threadFun	= [&input] (int startIdx, int endIdx, int startInt) {
-		//std::cout << "Filling vector from " << startIdx << " to " << endIdx << " with values from " << startInt << std::endl;
-		while (startIdx!=endIdx) {
-			input[startIdx]	= startInt++;
-			startIdx++;
-		}
-	};
-
-	std::vector<std::thread> threadV (4);
-	int offset		= input.size() / threadV.size();
-	int startInt	= 0;
-	for (size_t i=0; i<threadV.size(); i++) {
-		threadV[i]	= std::thread (threadFun, (i*offset), ((i+1)*offset), startInt+(i*offset));
-	}
-
-	for (auto &t : threadV)
-		t.join ();
-#else
-	int idx	= 1966;
+	int idx	= 0;
 	std::iota (input.begin(), input.end(), idx++);
-#endif
+	
+	std::mt19937 engine (seed);
+	std::default_random_engine engine1 {};
 
-	std::random_shuffle (input.begin(), input.end());
+	std::shuffle (std::begin (input), std::end(input), engine);
 }
 
 
@@ -179,6 +162,50 @@ void createRandomVector (IntVector &input, int seed, int parDeg) {
 }*/
 
 
+
+
+/*void createRandomVector (IntVector &input, int seed, int parDeg) {
+	std::mutex listMutex;
+	int inc			= 0;
+	int inputSize	= input.size ();
+	std::list<int> sourceList (inputSize*10);
+	std::iota (sourceList.begin(), sourceList.end(), inc++);
+
+	auto threadFun	= [&input, &sourceList, &listMutex, seed] (int startIdx, int endIdx, int startInt) {
+		int inputSize	= input.size ();
+		std::mt19937 mt (seed);
+		std::uniform_int_distribution<int> dist (1, inputSize*10);
+		
+		//std::cout << "Filling vector from " << startIdx << " to " << endIdx << " with values from " << startInt << std::endl;
+		while (startIdx!=endIdx) {
+			int el	= 0;
+			{
+				std::unique_lock<std::mutex> lock (listMutex);
+				int idx				= dist(mt);
+				auto it				= sourceList.begin ();
+				std::advance (it, idx);
+				el					= *it;
+				sourceList.erase (it);
+			}
+			input[startIdx++]	= el;
+			//std::cout << "Added " << el << "  here:  " << startIdx-1 << std::endl;
+		}
+	};
+
+	std::vector<std::thread> threadV (parDeg);
+	int offset		= input.size() / threadV.size();
+	int startInt	= 0;
+	for (size_t i=0; i<threadV.size(); i++) {
+		threadV[i]	= std::thread (threadFun, (i*offset), ((i+1)*offset), startInt+(i*offset));
+	}
+
+	for (auto &t : threadV)
+		t.join ();
+}*/
+
+
+
+
 void findOutSeparators (IntVector &target, IntVector &source, int n) {
 	auto it		= source.begin();
 	int size1	= source.size()-1;		// Number of elements to be taken into account (belonging to vector)
@@ -187,8 +214,6 @@ void findOutSeparators (IntVector &target, IntVector &source, int n) {
     int k		= size1%n1;				// Number of subset with size h+1
 	int i		= 0;					// Index of target array
 	int tmpN1	= 0;
-
-	//std::cout << h << " " << k << std::endl << std::endl;
 	
 	while (k--) {
 		target[i++]	= *(it++);
@@ -204,8 +229,6 @@ void findOutSeparators (IntVector &target, IntVector &source, int n) {
 	}
 
 	target[i]	= *(source.end()-1);
-
-	//TSIKIN_PRINT_V ("Taken separators", target, "");
 }
 
 
@@ -254,7 +277,9 @@ void setupBsp (BSP<el_t> &tAlg, int n, int p, int seed, IntVector &input,
 		s0->addActivity (
 			[] (int activityIndex, IntVector &actInput) {
 				std::sort (actInput.begin(), actInput.end());
+				mapMutex.lock ();
 				s0VectorsMap[activityIndex]	= actInput;
+				mapMutex.unlock ();
 			},
 			[p] (int activityIndex, IntVector &elements) {
 				IntCommunicationProtocol cp (p);
