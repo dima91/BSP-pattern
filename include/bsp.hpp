@@ -38,7 +38,7 @@ public:
 	~BSP ();
 
 
-	int addSuperstep (SuperstepPointer step);
+	uint addSuperstep (SuperstepPointer step);
 
 	void runAndWait (std::vector<std::vector<T>> &input, std::vector<std::vector<T>> &ouput, bool setAffinity);
 };
@@ -69,7 +69,7 @@ BSP<T>::~BSP () {
 
 
 template<typename T>
-int BSP<T>::addSuperstep (SuperstepPointer step) {
+uint BSP<T>::addSuperstep (SuperstepPointer step) {
 	supersteps.emplace_back (step);
 	return supersteps.size()-1;
 }
@@ -79,21 +79,21 @@ int BSP<T>::addSuperstep (SuperstepPointer step) {
 
 template<typename T>
 void BSP<T>::setupWorkers (bool setAffinity) {
-	int maxActivities	= 0;
+	uint maxActivities	= 0;
 	for (size_t i=0; i<supersteps.size(); i++) {
-		int tmpNum		= supersteps[i]->getActivitiesNumber();
+		uint tmpNum		= supersteps[i]->getActivitiesNumber();
 		maxActivities	= (maxActivities >= tmpNum) ? maxActivities : tmpNum;
 	};
 
 	workers	= std::vector<WorkerThread> (maxActivities);
 
 	if (setAffinity) {
-		unsigned int cpusNum	= std::thread::hardware_concurrency();
+		uint cpusNum	= std::thread::hardware_concurrency();
 		
-		if ((int) cpusNum < maxActivities)
+		if (cpusNum < maxActivities)
 			std::cout << "WARNING!\tTrying to set affinity for workers which number is greater than number of CPUs!\n";
 		
-		int idx	= 0;
+		uint idx	= 0;
 		std::for_each (workers.begin(), workers.end(), [&idx, cpusNum] (WorkerThread &w) {
 			w.setAffinity ((idx++) % cpusNum);
 		});
@@ -137,11 +137,8 @@ void BSP<T>::runAndWait (std::vector<std::vector<T>> &input, std::vector<std::ve
 			UTimer timer ("Superstep " + std::to_string (nextStep));
 			std::cout << "Running superstep  " << nextStep << std::endl;
 			retVal	= supersteps[nextStep]->runStep (workers, input, lockableVectors);
-		}
 
-		{
-			UTimer timer ("Swap vectors");
-			std::cout << "Swapping vectors" << std::endl;
+			// Swapping vectors
 			if (retVal == NextStepFlag) {
 				nextStep++;
 				swapVectors (input, lockableVectors);

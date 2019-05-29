@@ -18,14 +18,6 @@
 #define CPP_UNORDERED_VECTOR
 
 
-//#define SHARED_PTR
-#ifdef SHARED_PTR
-	using el_t	= std::shared_ptr<int>;
-#else
-	using el_t	= double;
-#endif
-
-
 //#define DEBUG
 #ifdef DEBUG
 	#define TISKIN_PRINT_V(lbl, vec, footer) {\
@@ -40,14 +32,15 @@
 #endif
 
 
+using el_t						= int;
 using IntVector					= std::vector<el_t>;
 using IntCommunicationProtocol	= Superstep<el_t>::CommunicationProtocol;
 using CommunicationProtocolFun	= std::function<IntCommunicationProtocol (IntVector &)>;
-using Parameters				= std::tuple<int, int, int, bool>;
+using Parameters				= std::tuple<uint, uint, int, bool>;
 
 
 std::mutex outputMutex;
-std::map<int, IntVector> s0VectorsMap;
+std::map<uint, IntVector> s0VectorsMap;
 std::mutex mapMutex;
 
 
@@ -62,10 +55,19 @@ bool parseArgs (int argn, char **argv, Parameters &params) {
 	}
 
 	try {
-		int n			= std::atoi (argv[1]);
-		int p			= std::atoi (argv[2]);
+		uint n			= std::atoi (argv[1]);
+		uint p			= std::atoi (argv[2]);
 		int seed		= -1;
 		bool affinity	= false;
+
+		if (n > 1073741824) {		// 2^30 
+			char inCh;
+			std::cout << "WARNING:\ttoo high number of elements!\nDo you want to continue? [y/<anthing>]" << std::flush;
+			std::cin >> inCh;
+			if (inCh != 'y') {
+				return false;
+			}
+		}
 		
 		
 		if (argn == 4) {
@@ -115,8 +117,8 @@ bool parseArgs (int argn, char **argv, Parameters &params) {
 
 
 
-void createRandomVector (IntVector &input, int seed, int parDeg) {
-	int idx	= 0;
+void createRandomVector (IntVector &input, int seed, uint parDeg) {
+	uint idx	= 0;
 	std::iota (input.begin(), input.end(), idx++);
 	
 	std::mt19937 engine (seed);
@@ -206,14 +208,14 @@ void createRandomVector (IntVector &input, int seed, int parDeg) {
 
 
 
-void findOutSeparators (IntVector &target, IntVector &source, int n) {
-	auto it		= source.begin();
-	int size1	= source.size()-1;		// Number of elements to be taken into account (belonging to vector)
-	int n1		= n-1;					// Number of elements to be selected
-	int h		= size1/n1;				// Size of subset
-    int k		= size1%n1;				// Number of subset with size h+1
-	int i		= 0;					// Index of target array
-	int tmpN1	= 0;
+void findOutSeparators (IntVector &target, IntVector &source, uint n) {
+	auto it		= source.begin ();
+	uint size1	= source.size ()-1;		// Number of elements to be taken into account (belonging to vector)
+	uint n1		= n-1;					// Number of elements to be selected
+	uint h		= size1/n1;				// Size of subset
+    uint k		= size1%n1;				// Number of subset with size h+1
+	uint i		= 0;					// Index of target array
+	uint tmpN1	= 0;
 	
 	while (k--) {
 		target[i++]	= *(it++);
@@ -232,7 +234,9 @@ void findOutSeparators (IntVector &target, IntVector &source, int n) {
 }
 
 
-void setupBsp (BSP<el_t> &tAlg, int n, int p, int seed, IntVector &input,
+
+
+void setupBsp (BSP<el_t> &tAlg, uint n, uint p, int seed, IntVector &input,
 				std::vector<IntVector> &bspInputs, std::vector<IntVector> &bspOutputs) {
 	
 	std::random_device randomDevice;
@@ -251,11 +255,11 @@ void setupBsp (BSP<el_t> &tAlg, int n, int p, int seed, IntVector &input,
 		bspInputs	= std::vector<IntVector> (p);
 		bspOutputs	= std::vector<IntVector> (p);
 
-		int actInputLen	= n/p;
-		for (int i=0; i<p; i++) {
+		uint actInputLen	= n/p;
+		for (uint i=0; i<p; i++) {
 			bspInputs[i]	= IntVector (actInputLen);
 			auto &vI		= bspInputs[i];
-			for (int j=0; j<actInputLen; j++) {
+			for (uint j=0; j<actInputLen; j++) {
 				vI[j]	= input[(actInputLen*i)+j];
 			}
 
@@ -273,19 +277,19 @@ void setupBsp (BSP<el_t> &tAlg, int n, int p, int seed, IntVector &input,
 
 	BSP<el_t>::SuperstepPointer s0	= BSP<el_t>::SuperstepPointer (new Superstep<el_t> ());
 
-	for (int i= 0; i<p; i++) {
+	for (uint i= 0; i<p; i++) {
 		s0->addActivity (
-			[] (int activityIndex, IntVector &actInput) {
+			[] (uint activityIndex, IntVector &actInput) {
 				std::sort (actInput.begin(), actInput.end());
 				mapMutex.lock ();
 				s0VectorsMap[activityIndex]	= actInput;
 				mapMutex.unlock ();
 			},
-			[p] (int activityIndex, IntVector &elements) {
+			[p] (uint activityIndex, IntVector &elements) {
 				IntCommunicationProtocol cp (p);
 				cp[0]	= IntVector (p+1);
 				findOutSeparators (std::ref(cp[0]), std::ref(elements), p+1);
-				for (int i=1; i<p; i++) {
+				for (uint i=1; i<p; i++) {
 					cp[i]	= IntVector (p+1);
 					cp[i]	= cp[0];
 				}
@@ -303,14 +307,14 @@ void setupBsp (BSP<el_t> &tAlg, int n, int p, int seed, IntVector &input,
 
 	BSP<el_t>::SuperstepPointer s1	= BSP<el_t>::SuperstepPointer (new Superstep<el_t> ());
 
-	for (int i= 0; i<p; i++) {
+	for (uint i= 0; i<p; i++) {
 		s1->addActivity (
-			[] (int activityIndex, IntVector &actInput) {
+			[] (uint activityIndex, IntVector &actInput) {
 				//TISKIN_PRINT_V ("Input " << activityIndex, actInput, "");
 				std::sort (actInput.begin(), actInput.end());
 				//TISKIN_PRINT_V ("Output " << activityIndex, actInput, "");
 			},
-			([p] (int activityIndex, IntVector &commElements) {
+			([p] (uint activityIndex, IntVector &commElements) {
 				std::vector<IntVector> cp (p);
 				IntVector separators (p+1);
 				findOutSeparators (std::ref(separators), std::ref(commElements), p+1);
@@ -348,12 +352,12 @@ void setupBsp (BSP<el_t> &tAlg, int n, int p, int seed, IntVector &input,
 
 	BSP<el_t>::SuperstepPointer s2	= BSP<el_t>::SuperstepPointer (new Superstep<el_t> ());
 
-	for (int i= 0; i<p; i++) {
+	for (uint i= 0; i<p; i++) {
 		s2->addActivity (
-			[] (int activityIndex, IntVector &actInput) {
+			[] (uint activityIndex, IntVector &actInput) {
 				std::sort (actInput.begin(), actInput.end());
 			},
-			([p] (int activityIndex, IntVector &elements) {
+			([p] (uint activityIndex, IntVector &elements) {
 				std::vector<IntVector> cp (p);
 				for (auto el: elements) {
 					cp[activityIndex].push_back (el);
@@ -385,8 +389,8 @@ int main (int argn, char **argv) {
 	}
 
 
-	int n			= std::get<0> (parameters);
-	int p			= std::get<1> (parameters);
+	uint n			= std::get<0> (parameters);
+	uint p			= std::get<1> (parameters);
 	int seed		= std::get<2> (parameters);
 	bool affinity	= std::get<3> (parameters);
 
