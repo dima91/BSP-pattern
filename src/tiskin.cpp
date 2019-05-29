@@ -122,8 +122,6 @@ void createRandomVector (IntVector &input, int seed) {
 	std::iota (input.begin(), input.end(), idx++);
 	
 	std::mt19937 engine (seed);
-	std::default_random_engine engine1 {};
-
 	std::shuffle (std::begin (input), std::end(input), engine);
 }
 
