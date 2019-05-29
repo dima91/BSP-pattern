@@ -20,7 +20,6 @@ add_library		(${PROJECT_NAME}_objs OBJECT ${SOURCE_FILES})
 
 ## Creating static library
 add_library(${PROJECT_NAME} STATIC $<TARGET_OBJECTS:${PROJECT_NAME}_objs>)
-#set_target_properties (${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
 
 
 # Creating execuables
@@ -39,4 +38,15 @@ target_link_libraries	(TiskinTrial ${PROJECT_NAME})
 ## (To build tests directory, just defien BUILD_TESTS to ON (cmake -D BUILD_TESTS=ON .) when executing 'cmake' command)
 if (${BUILD_TESTS})
     #add_subdirectory (tests)
+endif ()
+
+
+if (${COMPUTE_SEQUENTIAL})
+	target_compile_definitions (TiskinAlgorithm PRIVATE COMPUTE_SEQUENTIAL)
+endif ()
+
+
+if (${PRINT_FULL})
+	target_compile_definitions (TiskinAlgorithm PUBLIC PRINT_FULL)
+	target_compile_definitions (${PROJECT_NAME}_objs PUBLIC PRINT_FULL)
 endif ()

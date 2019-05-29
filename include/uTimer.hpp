@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
 #include <chrono>
-#include <thread>
 #include <ctime>
 
 #ifndef U_TIMER_HPP
@@ -19,10 +18,13 @@ private:
 	std::chrono::duration<double> elapsedTime;
 	std::string message;
 
+	static std::mutex *outputMutex;
+
 
 public:
 	UTimer (const std::string m) : message(m) {
-		start = std::chrono::system_clock::now();
+		start		= std::chrono::system_clock::now();
+		outputMutex	= nullptr;
 	}
 
 	~UTimer () {
@@ -32,9 +34,10 @@ public:
 		auto msec	= std::chrono::duration_cast<msecs>(elapsedTime).count();
 		
 		std::cout << message << " computed in " << usec << " usec  (" << msec << " milliseconds)" << std::endl;
-
 	}
 };
+
+std::mutex *UTimer::outputMutex;
 
 
 #endif // U_TIMER_HPP

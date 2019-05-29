@@ -15,17 +15,16 @@
 #include <algorithm>
 
 
-#define CPP_UNORDERED_VECTOR
 
-
-//#define DEBUG
-#ifdef DEBUG
+#ifdef PRINT_FULL
 	#define TISKIN_PRINT_V(lbl, vec, footer) {\
-		std::unique_lock<std::mutex> lock (outputMutex);\
-		std::cout << lbl << std::endl;\
-		for (auto el : vec)\
-			std::cout << el << " ";\
-		std::cout << std::endl << footer;\
+		{\
+			std::unique_lock<std::mutex> lock (outputMutex);\
+			std::cout << lbl << std::flush;\
+			for (auto el : vec)\
+				std::cout << el << " " << std::flush;\
+			std::cout << std::endl << footer;\
+		}\
 	}
 #else
 	#define TISKIN_PRINT_V(lbl, vec, footer) {}
@@ -62,7 +61,8 @@ bool parseArgs (int argn, char **argv, Parameters &params) {
 
 		if (n > 1073741824) {		// 2^30 
 			char inCh;
-			std::cout << "WARNING:\ttoo high number of elements!\nDo you want to continue? [y/<anthing>]" << std::flush;
+			std::cout << "WARNING:\ttoo high number of elements: it may be cause problems\n"
+					"Do you want to continue? [y/<anthing>]" << std::flush;
 			std::cin >> inCh;
 			if (inCh != 'y') {
 				return false;
@@ -117,7 +117,7 @@ bool parseArgs (int argn, char **argv, Parameters &params) {
 
 
 
-void createRandomVector (IntVector &input, int seed, uint parDeg) {
+void createRandomVector (IntVector &input, int seed) {
 	uint idx	= 0;
 	std::iota (input.begin(), input.end(), idx++);
 	
@@ -126,84 +126,6 @@ void createRandomVector (IntVector &input, int seed, uint parDeg) {
 
 	std::shuffle (std::begin (input), std::end(input), engine);
 }
-
-
-
-/*void createRandomVector (IntVector &input, int seed, int parDeg) {
-	std::mt19937 mt (seed);
-	std::uniform_int_distribution<int> dist (1, input.size()*10);
-	int nextInt	= 0;
-
-	for (size_t i=0; i<input.size(); i++) {
-		do {
-			nextInt	= dist(mt);
-		} while (std::find(input.begin(), input.end(), nextInt) != input.end());
-		input[i]	= nextInt;
-	}
-}*/
-
-
-
-
-/*void createRandomVector (IntVector &input, int seed, int parDeg) {
-	int idx			= 0;
-	int inputSize	= input.size ();
-	std::list<int> sourceList (inputSize*10);
-	std::mt19937 mt (seed);
-	std::uniform_int_distribution<int> dist (1, inputSize*10);
-
-	std::iota (sourceList.begin(), sourceList.end(), idx++);
-
-	for (size_t i=0; i<input.size(); i++) {
-		idx			= dist(mt);
-		auto it		= sourceList.begin ();
-		std::advance (it, idx);
-		input[i]	= *it;
-		sourceList.erase (it);
-	}
-}*/
-
-
-
-
-/*void createRandomVector (IntVector &input, int seed, int parDeg) {
-	std::mutex listMutex;
-	int inc			= 0;
-	int inputSize	= input.size ();
-	std::list<int> sourceList (inputSize*10);
-	std::iota (sourceList.begin(), sourceList.end(), inc++);
-
-	auto threadFun	= [&input, &sourceList, &listMutex, seed] (int startIdx, int endIdx, int startInt) {
-		int inputSize	= input.size ();
-		std::mt19937 mt (seed);
-		std::uniform_int_distribution<int> dist (1, inputSize*10);
-		
-		//std::cout << "Filling vector from " << startIdx << " to " << endIdx << " with values from " << startInt << std::endl;
-		while (startIdx!=endIdx) {
-			int el	= 0;
-			{
-				std::unique_lock<std::mutex> lock (listMutex);
-				int idx				= dist(mt);
-				auto it				= sourceList.begin ();
-				std::advance (it, idx);
-				el					= *it;
-				sourceList.erase (it);
-			}
-			input[startIdx++]	= el;
-			//std::cout << "Added " << el << "  here:  " << startIdx-1 << std::endl;
-		}
-	};
-
-	std::vector<std::thread> threadV (parDeg);
-	int offset		= input.size() / threadV.size();
-	int startInt	= 0;
-	for (size_t i=0; i<threadV.size(); i++) {
-		threadV[i]	= std::thread (threadFun, (i*offset), ((i+1)*offset), startInt+(i*offset));
-	}
-
-	for (auto &t : threadV)
-		t.join ();
-}*/
 
 
 
@@ -244,9 +166,8 @@ void setupBsp (BSP<el_t> &tAlg, uint n, uint p, int seed, IntVector &input,
 	
 	{
 		UTimer randomVector ("Creating random vector");
-		createRandomVector (input, (seed==-1) ? randomDevice() : seed, p);
+		createRandomVector (input, (seed==-1) ? randomDevice() : seed);
 	}
-	TISKIN_PRINT_V ("Input vector", input, "\n");
 
 
 	{
@@ -262,8 +183,6 @@ void setupBsp (BSP<el_t> &tAlg, uint n, uint p, int seed, IntVector &input,
 			for (uint j=0; j<actInputLen; j++) {
 				vI[j]	= input[(actInputLen*i)+j];
 			}
-
-			//TISKIN_PRINT_V ("Proc " << i << " input", bspInputs[i], "");
 		}
 	}
 
@@ -275,17 +194,19 @@ void setupBsp (BSP<el_t> &tAlg, uint n, uint p, int seed, IntVector &input,
 	// ============================================================
 	// Superstep 0
 
-	BSP<el_t>::SuperstepPointer s0	= BSP<el_t>::SuperstepPointer (new Superstep<el_t> ());
+	BSP<el_t>::SuperstepPointer s0	= BSP<el_t>::SuperstepPointer (new Superstep<el_t> (0));
 
 	for (uint i= 0; i<p; i++) {
 		s0->addActivity (
 			[] (uint activityIndex, IntVector &actInput) {
+				TISKIN_PRINT_V ("Input vector of activity " << activityIndex << ": ", actInput, "");
 				std::sort (actInput.begin(), actInput.end());
 				mapMutex.lock ();
 				s0VectorsMap[activityIndex]	= actInput;
 				mapMutex.unlock ();
 			},
 			[p] (uint activityIndex, IntVector &elements) {
+				//TISKIN_PRINT_V ("Input vector of activity " << activityIndex << ": ", actInput, "");
 				IntCommunicationProtocol cp (p);
 				cp[0]	= IntVector (p+1);
 				findOutSeparators (std::ref(cp[0]), std::ref(elements), p+1);
@@ -305,16 +226,16 @@ void setupBsp (BSP<el_t> &tAlg, uint n, uint p, int seed, IntVector &input,
 	// ============================================================
 	// Superstep 1 
 
-	BSP<el_t>::SuperstepPointer s1	= BSP<el_t>::SuperstepPointer (new Superstep<el_t> ());
+	BSP<el_t>::SuperstepPointer s1	= BSP<el_t>::SuperstepPointer (new Superstep<el_t> (1));
 
 	for (uint i= 0; i<p; i++) {
 		s1->addActivity (
 			[] (uint activityIndex, IntVector &actInput) {
-				//TISKIN_PRINT_V ("Input " << activityIndex, actInput, "");
+				TISKIN_PRINT_V ("Input vector of activity " << activityIndex << ": ", actInput, "");
 				std::sort (actInput.begin(), actInput.end());
-				//TISKIN_PRINT_V ("Output " << activityIndex, actInput, "");
 			},
 			([p] (uint activityIndex, IntVector &commElements) {
+				//TISKIN_PRINT_V ("Input vector of activity " << activityIndex << ": ", actInput, "");
 				std::vector<IntVector> cp (p);
 				IntVector separators (p+1);
 				findOutSeparators (std::ref(separators), std::ref(commElements), p+1);
@@ -329,8 +250,6 @@ void setupBsp (BSP<el_t> &tAlg, uint n, uint p, int seed, IntVector &input,
 				while (i < pi.size()) {
 					cp[k]	= IntVector ();
 					while (i < pi.size() && pi[i] <= separators[j]) {
-						/*if (activityIndex == 0)
-							std::cout << "Pushing to " << k << " element " << pi[i] << std::endl;*/
 						cp[k].push_back (pi[i]);
 						i++;
 					}
@@ -350,11 +269,12 @@ void setupBsp (BSP<el_t> &tAlg, uint n, uint p, int seed, IntVector &input,
 	// ============================================================
 	// Superstep 2
 
-	BSP<el_t>::SuperstepPointer s2	= BSP<el_t>::SuperstepPointer (new Superstep<el_t> ());
+	BSP<el_t>::SuperstepPointer s2	= BSP<el_t>::SuperstepPointer (new Superstep<el_t> (2));
 
 	for (uint i= 0; i<p; i++) {
 		s2->addActivity (
 			[] (uint activityIndex, IntVector &actInput) {
+				TISKIN_PRINT_V ("Input vector of activity " << activityIndex << ": ", actInput, "");
 				std::sort (actInput.begin(), actInput.end());
 			},
 			([p] (uint activityIndex, IntVector &elements) {
@@ -381,7 +301,6 @@ int main (int argn, char **argv) {
 								"\n\t\t-a\t\tTry to set affinity for worker threads";
 
 	Parameters parameters;
-
 	
 	if (!parseArgs (argn, argv, std::ref (parameters))) {
 		std::cerr << usageStr << std::endl;
@@ -415,6 +334,8 @@ int main (int argn, char **argv) {
 		#endif
 	}
 
+	TISKIN_PRINT_V ("Algorithm's input vector:\n", unorderedVector, "\n");
+
 	{
 		std::cout << std::endl <<
 				 	"====================\n" <<
@@ -427,11 +348,17 @@ int main (int argn, char **argv) {
 	for (auto out : bspOutput) {
 		orderedVector.insert (orderedVector.end(), out.begin(), out.end());
 	}
-	std::cout << "\nSorted?  " << ((std::is_sorted (orderedVector.begin(), orderedVector.end())) ? "YES" : "NO") << std::endl;
-	TISKIN_PRINT_V ("Output vector", orderedVector, "");
+	TISKIN_PRINT_V ("Algorithm's output vector:\n", orderedVector, "\n");
+	
+
+	{
+		UTimer timer ("Check of effectively sorted vector");
+		if (!std::is_sorted (orderedVector.begin(), orderedVector.end()))
+			std::cout << "The vector is NOT sorted!\nVERY DANGEROUS!\n";
+	}
 
 
-	#ifdef CPP_UNORDERED_VECTOR
+	#ifdef COMPUTE_SEQUENTIAL
 	try {
 		std::cout << std::endl <<
 				 	"=====================\n" <<
@@ -443,7 +370,7 @@ int main (int argn, char **argv) {
 	}
 	#endif
 
-	std::cout << "Bye!\n";
+	std::cout << std::endl ;
 
 
 	return EXIT_SUCCESS;

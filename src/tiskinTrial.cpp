@@ -63,7 +63,7 @@ void setupBsp (BSP<int> &tt, std::vector<int> &input, std::vector<std::vector<in
 	/*								  s0								*/
 	/* ==============================    ============================== */
 
-	BSP<int>::SuperstepPointer s0	= BSP<int>::SuperstepPointer (new Superstep<int> ());
+	BSP<int>::SuperstepPointer s0	= BSP<int>::SuperstepPointer (new Superstep<int> (0));
 
 	for (int i : {0, 1, 2}) {
 		s0->addActivity (
@@ -94,7 +94,7 @@ void setupBsp (BSP<int> &tt, std::vector<int> &input, std::vector<std::vector<in
 	/*								  s1								*/
 	/* ==============================    ============================== */
 
-	BSP<int>::SuperstepPointer s1	= BSP<int>::SuperstepPointer (new Superstep<int> ());
+	BSP<int>::SuperstepPointer s1	= BSP<int>::SuperstepPointer (new Superstep<int> (1));
 
 	for (size_t i : {0, 1, 2}) {
 		s1->addActivity (
@@ -140,7 +140,7 @@ void setupBsp (BSP<int> &tt, std::vector<int> &input, std::vector<std::vector<in
 	/*								  s2								*/
 	/* ==============================    ============================== */
 
-	BSP<int>::SuperstepPointer s2	= BSP<int>::SuperstepPointer (new Superstep<int> ());
+	BSP<int>::SuperstepPointer s2	= BSP<int>::SuperstepPointer (new Superstep<int> (2));
 
 	for (int i : {0, 1, 2}) {
 		s2->addActivity (

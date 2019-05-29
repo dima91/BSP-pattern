@@ -13,7 +13,6 @@
 #include <uTimer.hpp>
 
 #include <vector>
-//#include <iostream>
 
 
 
@@ -127,9 +126,7 @@ void BSP<T>::runAndWait (std::vector<std::vector<T>> &input, std::vector<std::ve
 	setupWorkers (setAffinity);
 
 	swapVectors (output, lockableVectors);
-
-	time_t tmpTime	= time (NULL);
-    std::cout << "Starting supersteps at  " << ctime (&tmpTime) << std::endl;
+	
 
 	while (retVal != EOCFlag && nextStep < (int) supersteps.size()) {
 

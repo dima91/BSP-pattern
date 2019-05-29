@@ -11,12 +11,21 @@
 #include <workerThread.hpp>
 #include <barrier.hpp>
 #include <lockableVector.hpp>
+#include <uTimer.hpp>
 
 #include <list>
 #include <numeric>
 #include <algorithm>
-//#include <iostream> // FIXME REMOVE ME AFTER TESTS
-#include <future> // FIXME REMOVE ME AFTER TESTS
+/*#include <iostream> // FIXME REMOVE ME AFTER TESTS
+#include <future> // FIXME REMOVE ME AFTER TESTS*/
+
+#ifdef PRINT_FULL
+	#define CREATE_UTIMER(str) {\
+		UTimer timer (str);\
+	}
+#else
+	#define CREATE_UTIMER(str) {}
+#endif
 
 
 
@@ -47,7 +56,7 @@ public:
 private:
 	// Holds the activity submitted by the user
 	std::vector<std::pair<ActivityFunction, std::function<CommunicationProtocol (int, std::vector<T>&)>>> activitiesFunctions;
-	//const int currentSSIndex;
+	const int superstepIdx;
 	Barrier startBarrier;
 	Barrier compPhaseBarrier;
 	Barrier commPhaseBarrier;
@@ -60,7 +69,7 @@ private:
 
 
 public:
-	Superstep ();
+	Superstep (int index);
 	~Superstep ();
 
 	int addActivity (ActivityFunction fun, CommunicationProtocol protocol);
@@ -92,7 +101,7 @@ std::atomic_int Superstep<T>::nextVectorToLock;
 
 
 template<typename T>
-Superstep<T>::Superstep () : startBarrier (0), compPhaseBarrier(0), commPhaseBarrier(0) {
+Superstep<T>::Superstep (int index) : superstepIdx (index), startBarrier (0), compPhaseBarrier(0), commPhaseBarrier(0) {
 	atExitF	= AtExitFunction ([&] (std::vector<LockableVector<T>> &outputItems) {
 		return -2;
 	});
@@ -207,6 +216,7 @@ void Superstep<T>::workerFunction (int index, std::vector<T> &inputItems, std::v
 	// Performing computation phase
 	activitiesFunctions[index].first (index, inputItems);
 	compPhaseBarrier.decreaseBarrier ();
+
 
 
 	// ==============================
