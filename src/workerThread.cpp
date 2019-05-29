@@ -81,13 +81,6 @@ void WorkerThread::assignActivity (Task a) {
 
 
 
-void WorkerThread::performActivity () {
-	// TODO
-}
-
-
-
-
 void WorkerThread::stopWorker () {
 	stopMe	= true;
 	taskCV.notify_all ();

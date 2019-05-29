@@ -16,8 +16,7 @@
 #include <list>
 #include <numeric>
 #include <algorithm>
-/*#include <iostream> // FIXME REMOVE ME AFTER TESTS
-#include <future> // FIXME REMOVE ME AFTER TESTS*/
+
 
 #ifdef PRINT_FULL
 	#define CREATE_UTIMER(str) {\
@@ -188,18 +187,9 @@ int Superstep<T>::runStep (std::vector<WorkerThread> &workers,
 		workers[i].assignActivity (std::move(packagedTask));
 	}
 
-	/*auto barrierPtr	= &commPhaseBarrier;
-	auto asyncWork	= std::async (std::launch::async, [barrierPtr] () {
-		while (barrierPtr->getRemainingEntities())  {
-			std::this_thread::sleep_for (std::chrono::seconds (2));
-			std::cout << "RW: " << barrierPtr->getRemainingEntities() << std::endl;
-		}
-	});*/
-
 	// Starting workers and waiting for their completion
 	startBarrier.decreaseBarrier ();
 	commPhaseBarrier.waitForFinish ();
-	//asyncWork.get();
 	
 	return atExitF (outputVectors);
 }
@@ -239,6 +229,10 @@ void Superstep<T>::workerFunction (int index, std::vector<T> &inputItems, std::v
 			}
 			else {
 				try {
+					// TODO Test me!
+					if ((int) outputItems.size() < *it) {
+						outputItems.resize (*it);
+					}
 					std::shared_ptr<LockedVector<T>> targetV	= outputItems[*it].tryLockAndGet();
 					auto &targetProtocol						= protocol[*it];
 					// Inserting data at the end of target vector
@@ -254,6 +248,8 @@ void Superstep<T>::workerFunction (int index, std::vector<T> &inputItems, std::v
 		}
 		vectorOffset	= 0;
 	}
+
+	outputItems.shrink_to_fit ();
 
 	commPhaseBarrier.decreaseBarrier ();
 }

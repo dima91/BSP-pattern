@@ -61,7 +61,9 @@ BSP<T>::BSP () {
 
 template<typename T>
 BSP<T>::~BSP () {
-	// TODO
+	std::for_each (workers.begin(), workers.end(), [] (WorkerThread &w) {
+		w.stopWorker ();
+	});
 }
 
 
@@ -104,7 +106,17 @@ void BSP<T>::setupWorkers (bool setAffinity) {
 
 template<typename T>
 void BSP<T>::swapVectors (std::vector<std::vector<T>> &a, std::vector<LockableVector<T>> &b) {
-	// FIXME Considerare il caso in cui i due array abbiamo dimensioni diverse
+	int aSize	= a.size ();
+	int bSize	= b.size ();
+
+	// Checking if vectors have different sizes
+	if (aSize > bSize) {
+		b.resize (aSize);
+	}
+	else if ( aSize < bSize) {
+		a.resize (bSize);
+	}
+
 	for (size_t i=0; i< b.size(); i++) {
 		b[i].swap (a[i]);
 	}
@@ -112,6 +124,9 @@ void BSP<T>::swapVectors (std::vector<std::vector<T>> &a, std::vector<LockableVe
 	for (size_t i=0; i< b.size(); i++) {
 		b[i].getVector().clear ();
 	}
+
+	a.shrink_to_fit ();
+	b.shrink_to_fit ();
 }
 
 
