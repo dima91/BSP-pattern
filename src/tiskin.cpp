@@ -33,9 +33,9 @@
 
 using el_t						= int;
 using IntVector					= std::vector<el_t>;
-using IntCommunicationProtocol	= Superstep<el_t>::CommunicationProtocol;
-using CommunicationProtocolFun	= std::function<IntCommunicationProtocol (IntVector &)>;
-using Parameters				= std::tuple<uint, uint, int, bool>;
+using IntCommunicationProtocols	= Superstep<el_t>::CommunicationProtocols;
+using CommunicationProtocolsFun	= std::function<IntCommunicationProtocols (IntVector &)>;
+using Parameters				= std::tuple<uint, uint, int, bool>;		// <n>  <p>  <seed>  <affinity>
 
 
 std::mutex outputMutex;
@@ -59,16 +59,6 @@ bool parseArgs (int argn, char **argv, Parameters &params) {
 		int seed		= -1;
 		bool affinity	= false;
 
-		if (n > 1073741824) {		// 2^30 
-			char inCh;
-			std::cout << "WARNING:\ttoo high number of elements: it may be cause problems\n"
-					"Do you want to continue? [y/<anthing>]" << std::flush;
-			std::cin >> inCh;
-			if (inCh != 'y') {
-				return false;
-			}
-		}
-		
 		
 		if (argn == 4) {
 			std::string arg3	= argv[3];
@@ -192,7 +182,7 @@ void setupBsp (BSP<el_t> &tAlg, uint n, uint p, int seed, IntVector &input,
 	// ============================================================
 	// Superstep 0
 
-	BSP<el_t>::SuperstepPointer s0	= BSP<el_t>::SuperstepPointer (new Superstep<el_t> (0));
+	BSP<el_t>::SuperstepPointer s0	= BSP<el_t>::SuperstepPointer (new Superstep<el_t> ());
 
 	for (uint i= 0; i<p; i++) {
 		s0->addActivity (
@@ -205,7 +195,7 @@ void setupBsp (BSP<el_t> &tAlg, uint n, uint p, int seed, IntVector &input,
 			},
 			[p] (uint activityIndex, IntVector &elements) {
 				//TISKIN_PRINT_V ("Input vector of activity " << activityIndex << ": ", actInput, "");
-				IntCommunicationProtocol cp (p);
+				IntCommunicationProtocols cp (p);
 				cp[0]	= IntVector (p+1);
 				findOutSeparators (std::ref(cp[0]), std::ref(elements), p+1);
 				for (uint i=1; i<p; i++) {
@@ -224,7 +214,7 @@ void setupBsp (BSP<el_t> &tAlg, uint n, uint p, int seed, IntVector &input,
 	// ============================================================
 	// Superstep 1 
 
-	BSP<el_t>::SuperstepPointer s1	= BSP<el_t>::SuperstepPointer (new Superstep<el_t> (1));
+	BSP<el_t>::SuperstepPointer s1	= BSP<el_t>::SuperstepPointer (new Superstep<el_t> ());
 
 	for (uint i= 0; i<p; i++) {
 		s1->addActivity (
@@ -267,7 +257,7 @@ void setupBsp (BSP<el_t> &tAlg, uint n, uint p, int seed, IntVector &input,
 	// ============================================================
 	// Superstep 2
 
-	BSP<el_t>::SuperstepPointer s2	= BSP<el_t>::SuperstepPointer (new Superstep<el_t> (2));
+	BSP<el_t>::SuperstepPointer s2	= BSP<el_t>::SuperstepPointer (new Superstep<el_t> ());
 
 	for (uint i= 0; i<p; i++) {
 		s2->addActivity (

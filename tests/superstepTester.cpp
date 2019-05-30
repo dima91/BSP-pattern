@@ -73,8 +73,8 @@ int main (int argn, char **argv) {
 	std::vector<LockableVector<int>> outputVectors (parDeg);
 
 	std::vector<std::vector<int>> comProto (parDeg);
-	Superstep<int> s0;
-	Superstep<int> s1;
+	Superstep<int> s0 ();
+	Superstep<int> s1 ();
 
 	for (int i=0; i<parDeg; i++) {
 		// ==============

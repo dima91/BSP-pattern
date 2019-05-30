@@ -147,7 +147,7 @@ void BSP<T>::runAndWait (std::vector<std::vector<T>> &input, std::vector<std::ve
 
 		{
 			UTimer timer ("Superstep " + std::to_string (nextStep));
-			std::cout << "Running superstep  " << nextStep << std::endl;
+			std::cout << "\n\n\n*********************************Running superstep  " << nextStep << std::endl;
 			retVal	= supersteps[nextStep]->runStep (workers, input, lockableVectors);
 
 			// Swapping vectors

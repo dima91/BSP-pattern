@@ -18,14 +18,6 @@
 #include <algorithm>
 
 
-#ifdef PRINT_FULL
-	#define CREATE_UTIMER(str) {\
-		UTimer timer (str);\
-	}
-#else
-	#define CREATE_UTIMER(str) {}
-#endif
-
 
 
 template<typename T>
@@ -35,10 +27,10 @@ public:
 	 * The i-th position of the vector contains elements which will be sent to activity i
 	 * of next superstep (length of this vector should be equal to parallelism degree)
 	 */
-	using CommunicationProtocol	= std::vector<std::vector<T>>;
+	using CommunicationProtocols	= std::vector<std::vector<T>>;
 
 	// Defines the type of a general activity
-	using ActivityFunction		= std::function<void (int, std::vector<T>&)>;
+	using ActivityFunction			= std::function<void (int, std::vector<T>&)>;
 
 	/* Type of function called at the end of superstep to decide whether contiue execution or not
 	 * Arguments:
@@ -54,11 +46,11 @@ public:
 
 private:
 	// Holds the activity submitted by the user
-	std::vector<std::pair<ActivityFunction, std::function<CommunicationProtocol (int, std::vector<T>&)>>> activitiesFunctions;
-	const int superstepIdx;
+	std::vector<std::pair<ActivityFunction, std::function<CommunicationProtocols (int, std::vector<T>&)>>> activitiesFunctions;
 	Barrier startBarrier;
 	Barrier compPhaseBarrier;
 	Barrier commPhaseBarrier;
+	std::mutex outputVectorsMutex;
 	AtExitFunction atExitF;
 
 	// Function executed by a generic WorkerThread
@@ -68,11 +60,11 @@ private:
 
 
 public:
-	Superstep (int index);
+	Superstep ();
 	~Superstep ();
 
-	int addActivity (ActivityFunction fun, CommunicationProtocol protocol);
-	int addActivity (ActivityFunction fun, std::function<CommunicationProtocol (int, std::vector<T>&)> protocol);
+	int addActivity (ActivityFunction fun, CommunicationProtocols protocol);
+	int addActivity (ActivityFunction fun, std::function<CommunicationProtocols (int, std::vector<T>&)> protocol);
 
 	/* Method to execute this current superstep. It requries a vector of workers on which the activity will be run,
 	 * a vector containing vector which hold input elements for that worker and a LockableVector on which will be
@@ -100,7 +92,7 @@ std::atomic_int Superstep<T>::nextVectorToLock;
 
 
 template<typename T>
-Superstep<T>::Superstep (int index) : superstepIdx (index), startBarrier (0), compPhaseBarrier(0), commPhaseBarrier(0) {
+Superstep<T>::Superstep () : startBarrier (0), compPhaseBarrier(0), commPhaseBarrier(0) {
 	atExitF	= AtExitFunction ([&] (std::vector<LockableVector<T>> &outputItems) {
 		return -2;
 	});
@@ -116,11 +108,11 @@ Superstep<T>::~Superstep () {}
 
 
 template<typename T>
-int Superstep<T>::addActivity (ActivityFunction fun, CommunicationProtocol protocol) {
-	auto protoFun	= std::function<Superstep<T>::CommunicationProtocol (std::vector<int> &)> ([protocol] (std::vector<int> els) {
-							return protocol;
+int Superstep<T>::addActivity (ActivityFunction fun, CommunicationProtocols protocols) {
+	auto protoFun	= std::function<Superstep<T>::CommunicationProtocols (std::vector<int> &)> ([protocols] (std::vector<int> els) {
+							return protocols;
 						});
-	auto element	= std::make_pair<ActivityFunction, std::function<CommunicationProtocol (std::vector<T>&)>>
+	auto element	= std::make_pair<ActivityFunction, std::function<CommunicationProtocols (std::vector<T>&)>>
 						(std::move(fun), std::move(protoFun));
 
 	activitiesFunctions.push_back (std::move(element));
@@ -132,8 +124,8 @@ int Superstep<T>::addActivity (ActivityFunction fun, CommunicationProtocol proto
 
 
 template<typename T>
-int Superstep<T>::addActivity (ActivityFunction fun, std::function<CommunicationProtocol (int activityIndex, std::vector<T>&)> protocol) {
-	auto element	= std::make_pair<ActivityFunction, std::function<CommunicationProtocol (int activityIndex, std::vector<T>&)>>
+int Superstep<T>::addActivity (ActivityFunction fun, std::function<CommunicationProtocols (int activityIndex, std::vector<T>&)> protocol) {
+	auto element	= std::make_pair<ActivityFunction, std::function<CommunicationProtocols (int activityIndex, std::vector<T>&)>>
 						(std::move(fun), std::move(protocol));
 	activitiesFunctions.push_back (std::move(element));
 	
@@ -205,39 +197,54 @@ void Superstep<T>::workerFunction (int index, std::vector<T> &inputItems, std::v
 	// ============================
 	// Performing computation phase
 	activitiesFunctions[index].first (index, inputItems);
+
 	compPhaseBarrier.decreaseBarrier ();
 
 
 
 	// ==============================
 	// Performing communication phase
-	CommunicationProtocol protocol	= activitiesFunctions[index].second (index, std::ref(inputItems));
-	std::list<int> remainingActivities (activitiesFunctions.size());
+	// Computing vector which defines the communication phase
+	CommunicationProtocols protocols	= activitiesFunctions[index].second (index, std::ref(inputItems));
+	
+	// Checking if a resize of outputvectors is needed
+	{
+		std::unique_lock<std::mutex> lock (outputVectorsMutex);
+		
+		if (protocols.size() > outputItems.size()) {
+			//std::cout << "Increasing\n";
+			outputItems.resize (protocols.size ());
+		}
+		else if (protocols.size() < outputItems.size()) {
+			//std::cout << "Decreasing to " << protocols.size() << "\n";
+			outputItems.resize (protocols.size ());
+			outputItems.shrink_to_fit ();			// FIXME It doeasn't work!
+		}
+	}
+
+	std::list<int> remainingActivities (protocols.size());
 	int idx	= 0;
 	std::iota (std::begin(remainingActivities), std::end(remainingActivities), idx++);
 
 
 	int vectorOffset	= (nextVectorToLock++) % remainingActivities.size();
 	while (remainingActivities.size() > 0) {
-		std::list<int> &ra	= remainingActivities;
-		auto it	= std::begin(ra);
+		auto it	= std::begin (remainingActivities);
 		std::advance (it, vectorOffset);
-		while (it!=ra.end()) {
 
-			if (protocol[*it].size() == 0) {
+		while (it!=remainingActivities.end()) {
+
+			if (protocols[*it].size() == 0) {
 				remainingActivities.erase (it++);
 			}
 			else {
 				try {
-					// TODO Test me!
-					if ((int) outputItems.size() < *it) {
-						outputItems.resize (*it);
-					}
 					std::shared_ptr<LockedVector<T>> targetV	= outputItems[*it].tryLockAndGet();
-					auto &targetProtocol						= protocol[*it];
+					auto &targetProtocol						= protocols[*it];
+					
 					// Inserting data at the end of target vector
 					for (auto i : targetProtocol) {
-						targetV->data.insert (targetV->data.end(), std::move(i));
+						targetV->data.push_back (i);
 					}
 
 					remainingActivities.erase (it++);
