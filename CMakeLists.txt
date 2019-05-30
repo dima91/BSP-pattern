@@ -34,6 +34,3 @@ endif ()
 if (${PRINT_FULL})
 	target_compile_definitions (TiskinAlgorithm PRIVATE PRINT_FULL)
 endif ()
-
-add_executable (SupestepTester2 tests/superstepTester2.cpp)
-target_link_libraries	(SupestepTester2 ${PROJECT_NAME})

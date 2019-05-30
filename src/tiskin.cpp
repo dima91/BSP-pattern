@@ -238,7 +238,7 @@ void setupBsp (BSP<el_t> &tAlg, uint n, uint p, int seed, IntVector &input,
 				while (i < pi.size()) {
 					cp[k]	= IntVector ();
 					while (i < pi.size() && pi[i] <= separators[j]) {
-						cp[k].push_back (pi[i]);
+						cp[k].emplace_back (pi[i]);
 						i++;
 					}
 					j++;
@@ -268,7 +268,7 @@ void setupBsp (BSP<el_t> &tAlg, uint n, uint p, int seed, IntVector &input,
 			([p] (uint activityIndex, IntVector &elements) {
 				std::vector<IntVector> cp (p);
 				for (auto el: elements) {
-					cp[activityIndex].push_back (el);
+					cp[activityIndex].emplace_back (el);
 				}
 				return cp;
 			})
@@ -304,6 +304,10 @@ int main (int argn, char **argv) {
 	std::cout << "Using a vector of   size " << n << "   and   "  << p << " processors,  "
 					" with   seed=" << seed << "   and   affinity=" << affinity << std::endl << std::endl;
 
+	uint cpusNum	= std::thread::hardware_concurrency();
+	if (cpusNum < p)
+		std::cout << "WARNING!\tTrying to create a set of workers which number is greater than number of CPUs!\n";
+
 	BSP<el_t> tiskinAlgorithm;
 	IntVector cppUnorderedVector;
 	IntVector unorderedVector;
@@ -317,7 +321,7 @@ int main (int argn, char **argv) {
 					"Setting up environment\n";
 		UTimer environmentTimer ("Environment setup");
 		setupBsp (std::ref(tiskinAlgorithm), n, p, seed, std::ref(unorderedVector), std::ref(bspInput), std::ref(bspOutput));	
-		#ifdef CPP_UNORDERED_VECTOR
+		#ifdef COMPUTE_SEQUENTIAL
 		cppUnorderedVector	= unorderedVector;
 		#endif
 	}
@@ -347,14 +351,13 @@ int main (int argn, char **argv) {
 
 
 	#ifdef COMPUTE_SEQUENTIAL
-	try {
+	{
 		std::cout << std::endl <<
 				 	"=====================\n" <<
 					"C++ sorting algorithm\n";
 		UTimer cppTimer ("C++ sort algorithm");
+		std::cout << std::is_sorted (cppUnorderedVector.begin (), cppUnorderedVector.end()) << std::endl;
 		std::sort (cppUnorderedVector.begin(), cppUnorderedVector.end());
-	} catch (std::runtime_error &e) {
-		std::cerr << "Catched an exception! " << e.what() << std::endl;
 	}
 	#endif
 

@@ -41,7 +41,9 @@ public:
 	 *  -2		Next superstep
 	 *	n>=0	Termination not reached. 'n' is the index of the next superstep
 	 */
-	using AtExitFunction	= std::function<int (std::vector<LockableVector<T>>&)>;
+	using AtExitFunction		= std::function<int (std::vector<LockableVector<T>>&)>;
+	const int NEXT_STEP_FLAG	= -2;			// Going to next step during computation
+	const int EOC_FLAG			= -1;			// End of computation
 
 
 private:
@@ -94,7 +96,7 @@ std::atomic_int Superstep<T>::nextVectorToLock;
 template<typename T>
 Superstep<T>::Superstep () : startBarrier (0), compPhaseBarrier(0), commPhaseBarrier(0) {
 	atExitF	= AtExitFunction ([&] (std::vector<LockableVector<T>> &outputItems) {
-		return -2;
+		return NEXT_STEP_FLAG;
 	});
 }
 
@@ -115,7 +117,7 @@ int Superstep<T>::addActivity (ActivityFunction fun, CommunicationProtocols prot
 	auto element	= std::make_pair<ActivityFunction, std::function<CommunicationProtocols (std::vector<T>&)>>
 						(std::move(fun), std::move(protoFun));
 
-	activitiesFunctions.push_back (std::move(element));
+	activitiesFunctions.emplace_back (std::move(element));
 
 	return activitiesFunctions.size()-1;
 }
@@ -127,7 +129,7 @@ template<typename T>
 int Superstep<T>::addActivity (ActivityFunction fun, std::function<CommunicationProtocols (int activityIndex, std::vector<T>&)> protocol) {
 	auto element	= std::make_pair<ActivityFunction, std::function<CommunicationProtocols (int activityIndex, std::vector<T>&)>>
 						(std::move(fun), std::move(protocol));
-	activitiesFunctions.push_back (std::move(element));
+	activitiesFunctions.emplace_back (std::move(element));
 	
 	return activitiesFunctions.size()-1;
 }
@@ -193,11 +195,11 @@ template<typename T>
 void Superstep<T>::workerFunction (int index, std::vector<T> &inputItems, std::vector<LockableVector<T>> &outputItems) {
 	startBarrier.waitForFinish ();
 
+
 	
 	// ============================
 	// Performing computation phase
 	activitiesFunctions[index].first (index, inputItems);
-
 	compPhaseBarrier.decreaseBarrier ();
 
 
@@ -212,13 +214,7 @@ void Superstep<T>::workerFunction (int index, std::vector<T> &inputItems, std::v
 		std::unique_lock<std::mutex> lock (outputVectorsMutex);
 		
 		if (protocols.size() > outputItems.size()) {
-			//std::cout << "Increasing\n";
 			outputItems.resize (protocols.size ());
-		}
-		else if (protocols.size() < outputItems.size()) {
-			//std::cout << "Decreasing to " << protocols.size() << "\n";
-			outputItems.resize (protocols.size ());
-			outputItems.shrink_to_fit ();			// FIXME It doeasn't work!
 		}
 	}
 
@@ -244,7 +240,7 @@ void Superstep<T>::workerFunction (int index, std::vector<T> &inputItems, std::v
 					
 					// Inserting data at the end of target vector
 					for (auto i : targetProtocol) {
-						targetV->data.push_back (i);
+						targetV->data.emplace_back (i);
 					}
 
 					remainingActivities.erase (it++);

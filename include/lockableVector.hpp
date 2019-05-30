@@ -51,7 +51,7 @@ public:
 	}
 
 	LockableVector (LockableVector &&lv) {
-		dataVector	= std::vector<T> (0);	// FIXME
+		dataVector	= std::vector<T> (lv.dataVector.size());
 	}
 
 	LockableVector () {
