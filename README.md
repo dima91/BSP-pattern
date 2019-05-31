@@ -21,3 +21,7 @@ The pattern must be tested executing the Tsikin BSP sortingalgorithm described a
 + **second super-step**: each concurrent activity sorts the list of all samples received, including the ones computed on its own. Then it picks up *p+1* separator items equally distributed in the sequence. Subsequently sends all the items in between separator *p* and *p+1* to concurrent activity *p*;
 + **third super-step**: each concurrent activity sorts the received items;
 
+#### TODO list
++ [] add supersteps tester, to test possibility to define different numbers of activities for each superstep and possibility to specify the next superstep to be exeuted
++ [] include both superstep testers in the delivery script
++ [] write the report

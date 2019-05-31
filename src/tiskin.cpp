@@ -356,7 +356,6 @@ int main (int argn, char **argv) {
 				 	"=====================\n" <<
 					"C++ sorting algorithm\n";
 		UTimer cppTimer ("C++ sort algorithm");
-		std::cout << std::is_sorted (cppUnorderedVector.begin (), cppUnorderedVector.end()) << std::endl;
 		std::sort (cppUnorderedVector.begin(), cppUnorderedVector.end());
 	}
 	#endif

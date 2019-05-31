@@ -25,6 +25,10 @@ add_library		(${PROJECT_NAME} STATIC $<TARGET_OBJECTS:${PROJECT_NAME}_objs>)
 add_executable			(TiskinAlgorithm src/tiskin.cpp)
 target_link_libraries	(TiskinAlgorithm ${PROJECT_NAME})
 
+# TODO Creating test executables
+#add_executable			(UnitTests ...)
+#target_link_libraries	(UnitTests ...)
+
 
 if (${COMPUTE_SEQUENTIAL})
 	target_compile_definitions (TiskinAlgorithm PRIVATE COMPUTE_SEQUENTIAL)
