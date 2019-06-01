@@ -23,12 +23,12 @@ private:
 
 public:
 	UTimer (const std::string m) : message(m) {
-		start		= std::chrono::system_clock::now();
+		start		= std::chrono::high_resolution_clock::now();
 		outputMutex	= nullptr;
 	}
 
 	~UTimer () {
-		stop		= std::chrono::system_clock::now();
+		stop		= std::chrono::high_resolution_clock::now();
 		elapsedTime	= stop - start;
 		auto usec	= std::chrono::duration_cast<usecs>(elapsedTime).count();
 		auto msec	= std::chrono::duration_cast<msecs>(elapsedTime).count();

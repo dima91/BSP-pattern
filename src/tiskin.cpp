@@ -118,6 +118,24 @@ void createRandomVector (IntVector &input, int seed) {
 
 
 
+/* FIXME PIÙ LENTO MA PIÙ CORRETTO
+void createRandomVector (IntVector &input, int seed) {
+    std::mt19937 mt (seed);
+	std::uniform_int_distribution<int> dist (1, input.size()*10);
+	int nextInt	= 0;
+
+	for (size_t i=0; i<input.size(); i++) {
+		do {
+			nextInt	= dist(mt);
+		} while (std::find(input.begin(), input.end(), nextInt) != input.end());
+		input[i]	= nextInt;
+	}
+}*/
+
+
+
+
+
 void findOutSeparators (IntVector &target, IntVector &source, uint n) {
 	auto it		= source.begin ();
 	uint size1	= source.size ()-1;		// Number of elements to be taken into account (belonging to vector)

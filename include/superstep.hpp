@@ -112,6 +112,7 @@ Superstep<T>::~Superstep () {}
 template<typename T>
 int Superstep<T>::addActivity (ActivityFunction fun, CommunicationProtocols protocols) {
 	auto protoFun	= std::function<Superstep<T>::CommunicationProtocols (std::vector<int> &)> ([protocols] (std::vector<int> els) {
+							// FIXME In this case 'protocols' array contains the indexes of array --> convert it into elements
 							return protocols;
 						});
 	auto element	= std::make_pair<ActivityFunction, std::function<CommunicationProtocols (std::vector<T>&)>>
@@ -223,6 +224,7 @@ void Superstep<T>::workerFunction (int index, std::vector<T> &inputItems, std::v
 	std::iota (std::begin(remainingActivities), std::end(remainingActivities), idx++);
 
 
+	// TODO Try to drop the offset!
 	int vectorOffset	= (nextVectorToLock++) % remainingActivities.size();
 	while (remainingActivities.size() > 0) {
 		auto it	= std::begin (remainingActivities);
@@ -235,6 +237,7 @@ void Superstep<T>::workerFunction (int index, std::vector<T> &inputItems, std::v
 			}
 			else {
 				try {
+					// TODO Try to lock without tryLockAndGet
 					std::shared_ptr<LockedVector<T>> targetV	= outputItems[*it].tryLockAndGet();
 					auto &targetProtocol						= protocols[*it];
 					

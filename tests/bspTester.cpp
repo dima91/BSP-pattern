@@ -8,8 +8,8 @@
 
 
 using IntActivityFunction			= Superstep<int>::ActivityFunction;
-using IntCommunicationProtocol		= Superstep<int>::CommunicationProtocol;
-using IntCommunicationProtocolFun	= std::function<Superstep<int>::CommunicationProtocol (int, std::vector<int> &)>;
+using IntCommunicationProtocol		= Superstep<int>::CommunicationProtocols;
+using IntCommunicationProtocolFun	= std::function<Superstep<int>::CommunicationProtocols (int, std::vector<int> &)>;
 
 
 
