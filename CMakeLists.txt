@@ -22,8 +22,8 @@ add_library		(${PROJECT_NAME} STATIC $<TARGET_OBJECTS:${PROJECT_NAME}_objs>)
 
 
 ## Creating TiskinAlgorithm executable
-add_executable			(TiskinAlgorithm src/tiskin.cpp)
-target_link_libraries	(TiskinAlgorithm ${PROJECT_NAME})
+#add_executable			(TiskinAlgorithm src/tiskin.cpp)
+#target_link_libraries	(TiskinAlgorithm ${PROJECT_NAME})
 
 # Creating unit tests executables
 add_executable			(BspTester	tests/bspTester.cpp)
@@ -34,10 +34,10 @@ target_link_libraries	(BspTester	${PROJECT_NAME})
 
 
 if (${COMPUTE_SEQUENTIAL})
-	target_compile_definitions (TiskinAlgorithm PRIVATE COMPUTE_SEQUENTIAL)
+#	target_compile_definitions (TiskinAlgorithm PRIVATE COMPUTE_SEQUENTIAL)
 endif ()
 
 
 if (${PRINT_FULL})
-	target_compile_definitions (TiskinAlgorithm PRIVATE PRINT_FULL)
+#	target_compile_definitions (TiskinAlgorithm PRIVATE PRINT_FULL)
 endif ()
