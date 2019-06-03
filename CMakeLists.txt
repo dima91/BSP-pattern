@@ -21,13 +21,16 @@ add_library		(${PROJECT_NAME}_objs OBJECT ${SOURCE_FILES})
 add_library		(${PROJECT_NAME} STATIC $<TARGET_OBJECTS:${PROJECT_NAME}_objs>)
 
 
-# Creating execuables
+## Creating TiskinAlgorithm executable
 add_executable			(TiskinAlgorithm src/tiskin.cpp)
 target_link_libraries	(TiskinAlgorithm ${PROJECT_NAME})
 
-# TODO Creating test executables
-#add_executable			(UnitTests ...)
-#target_link_libraries	(UnitTests ...)
+# Creating unit tests executables
+add_executable			(BspTester	tests/bspTester.cpp)
+target_link_libraries	(BspTester	${PROJECT_NAME})
+#add_executable			(SuperstepTester	tests/superstepTester.cpp)
+#target_link_libraries	(SuperstepTester	${PROJECT_NAME})
+# TODO Other executables..?
 
 
 if (${COMPUTE_SEQUENTIAL})

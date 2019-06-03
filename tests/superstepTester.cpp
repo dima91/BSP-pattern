@@ -8,10 +8,11 @@
 #include <algorithm>
 #include <random>
 
+
 using namespace std;
 using IntActivityFunction			= Superstep<int>::ActivityFunction;
-using IntCommunicationProtocol		= Superstep<int>::CommunicationProtocol;
-using IntCommunicationProtocolFun	= std::function<Superstep<int>::CommunicationProtocol (int, std::vector<int> &)>;
+using IntCommunicationProtocols		= Superstep<int>::CommunicationProtocols;
+using IntCommunicationProtocolsFun	= std::function<Superstep<int>::CommunicationProtocols (int, std::vector<int> &)>;
 
 
 
@@ -85,13 +86,13 @@ int main (int argn, char **argv) {
 			}
 			return ;
 		});
-		auto aComFun	= IntCommunicationProtocolFun ([parDeg, i] (int actIdx, std::vector<int> els) {
+		auto aComFun	= IntCommunicationProtocolsFun ([parDeg, i] (int actIdx, std::vector<int> els) {
 				std::random_device random_device;
 				std::mt19937 engine{random_device()};
 				std::uniform_int_distribution<int> dist(100, 300);
 				std::this_thread::sleep_for (std::chrono::milliseconds (dist(engine)));
 
-				IntCommunicationProtocol cp (parDeg+1);
+				IntCommunicationProtocols cp (parDeg+1);
 				cp[(i+1)%parDeg] = {0, 1};
 
 				return cp;
@@ -107,13 +108,13 @@ int main (int argn, char **argv) {
 			}
 			return ;
 		});
-		auto bComFun	= IntCommunicationProtocolFun ([parDeg, i] (int actIdx, std::vector<int> els) {
+		auto bComFun	= IntCommunicationProtocolsFun ([parDeg, i] (int actIdx, std::vector<int> els) {
 			std::random_device random_device;
 			std::mt19937 engine{random_device()};
 			std::uniform_int_distribution<int> dist(100, 300);
 			std::this_thread::sleep_for (std::chrono::milliseconds (dist(engine)));
 
-			IntCommunicationProtocol cp (parDeg);
+			IntCommunicationProtocols cp (parDeg);
 			cp[(i-1+parDeg)%parDeg] = {0, 1};
 
 			return cp;
