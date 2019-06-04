@@ -1,4 +1,11 @@
 
+//#define MAP_TESTER				// First implementation
+#define MAP_OF_SEQ_TESTER		// Second implementaton
+
+
+#ifdef MAP_TESTER
+
+
 #include <bsp.hpp>
 #include <uTimer.hpp>
 
@@ -13,14 +20,8 @@ using IntCommunicationProtocol		= Superstep<int>::CommunicationProtocols;
 using IntCommunicationProtocolFun	= std::function<Superstep<int>::CommunicationProtocols (int, std::vector<int> &)>;
 using ms							= milliseconds;
 
-#define MAP_TESTER				// First implementation
-//#define MAP_OF_SEQ_TESTER		// Second implementaton
-
 #define COMP_PHASE_DELAY 80 // ms
 #define COMM_PHASE_DELAY 20 // ms
-
-
-#ifdef MAP_TESTER
 
 
 
@@ -84,6 +85,24 @@ int main (int argn, char **argv) {
 
 
 #ifdef MAP_OF_SEQ_TESTER
+#define MAP_OF_SEQ_MODEL
+
+#include <bsp.hpp>
+#include <uTimer.hpp>
+
+#include <iostream>
+#include <algorithm>
+#include <random>
+
+using namespace std::chrono;
+
+using IntActivityFunction			= Superstep<int>::ActivityFunction;
+using IntCommunicationProtocol		= Superstep<int>::CommunicationProtocols;
+using IntCommunicationProtocolFun	= std::function<Superstep<int>::CommunicationProtocols (int, std::vector<int> &)>;
+using ms							= milliseconds;
+
+#define COMP_PHASE_DELAY 80 // ms
+#define COMM_PHASE_DELAY 20 // ms
 
 
 
