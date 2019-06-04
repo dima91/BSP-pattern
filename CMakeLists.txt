@@ -26,8 +26,8 @@ add_library		(${PROJECT_NAME} STATIC $<TARGET_OBJECTS:${PROJECT_NAME}_objs>)
 #target_link_libraries	(TiskinAlgorithm ${PROJECT_NAME})
 
 # Creating unit tests executables
-add_executable			(BspTester	tests/bspTester.cpp)
-target_link_libraries	(BspTester	${PROJECT_NAME})
+#add_executable			(BspTester	tests/bspTester.cpp)
+#target_link_libraries	(BspTester	${PROJECT_NAME})
 add_executable			(PerformanceEvaluator	tests/performanceEvaluator.cpp)
 target_link_libraries	(PerformanceEvaluator	${PROJECT_NAME})
 

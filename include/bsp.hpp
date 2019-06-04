@@ -14,7 +14,7 @@
 
 #include <vector>
 
-#define MAP_OF_SEQ_MODEL		// TODO  REMOVE ME!
+//#define MAP_OF_SEQ_MODEL		// TODO  REMOVE ME!
 
 #ifdef MAP_OF_SEQ_MODEL
 
@@ -30,7 +30,7 @@ private:
 	std::vector<WorkerThread> workers;
 	std::vector<SuperstepPointer> supersteps;
 
-	void setupWorkers (bool setAffinity);
+	void setupWorkers (int q, bool setAffinity);
 	void swapVectors (std::vector<std::vector<T>> &a, std::vector<LockableVector<T>> &b);
 
 	const int NEXT_STEP_FLAG	= -2;			// Going to next step during computation
@@ -44,7 +44,7 @@ public:
 
 	uint addSuperstep (SuperstepPointer step);
 
-	void runAndWait (std::vector<std::vector<T>> &input, std::vector<std::vector<T>> &ouput, bool setAffinity);
+	void runAndWait (int q, std::vector<std::vector<T>> &input, std::vector<std::vector<T>> &ouput, bool setAffinity);
 };
 
 
@@ -82,14 +82,14 @@ uint BSP<T>::addSuperstep (SuperstepPointer step) {
 
 
 template<typename T>
-void BSP<T>::setupWorkers (bool setAffinity) {
+void BSP<T>::setupWorkers (int q, bool setAffinity) {
 	uint maxActivities	= 0;
 	for (size_t i=0; i<supersteps.size(); i++) {
 		uint tmpNum		= supersteps[i]->getActivitiesNumber();
 		maxActivities	= (maxActivities >= tmpNum) ? maxActivities : tmpNum;
 	};
 
-	workers			= std::vector<WorkerThread> (maxActivities);
+	workers			= std::vector<WorkerThread> (q*maxActivities);
 	uint cpusNum	= std::thread::hardware_concurrency();
 
 	if (setAffinity) {
@@ -132,12 +132,12 @@ void BSP<T>::swapVectors (std::vector<std::vector<T>> &a, std::vector<LockableVe
 
 
 template<typename T>
-void BSP<T>::runAndWait (std::vector<std::vector<T>> &input, std::vector<std::vector<T>> &output, bool setAffinity) {
+void BSP<T>::runAndWait (int q, std::vector<std::vector<T>> &input, std::vector<std::vector<T>> &output, bool setAffinity) {
 	int retVal		= 0;
 	int nextStep	= 0;
 	std::vector<LockableVector<T>> lockableVectors (output.size());
 
-	setupWorkers (setAffinity);
+	setupWorkers (q, setAffinity);
 
 	swapVectors (output, lockableVectors);
 	
@@ -147,7 +147,7 @@ void BSP<T>::runAndWait (std::vector<std::vector<T>> &input, std::vector<std::ve
 		{
 			UTimer timer ("Superstep " + std::to_string (nextStep));
 			std::cout << "\n\nRunning superstep  " << nextStep << std::endl;
-			retVal	= supersteps[nextStep]->runStep (workers, input, lockableVectors);
+			retVal	= supersteps[nextStep]->runStep (q, workers, input, lockableVectors);
 
 			// Swapping vectors
 			if (retVal == NEXT_STEP_FLAG) {
