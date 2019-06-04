@@ -23,7 +23,6 @@ The pattern must be tested executing the Tsikin BSP sortingalgorithm described a
 
 #### TODO list
 + [ ] add supersteps tester, to test possibility to define different numbers of activities for each superstep and possibility to specify the next superstep to be exeuted
-+ [ ] include both superstep testers in the delivery script
-+ [ ] fix and include bsp tester inside cmake and delivery script
-+ [ ] **maybe** implement the three different activities composition
++ [ ] fix and include bsp testers inside cmake and delivery script
++ [ ] implement the two different activities composition
 + [ ] write the report

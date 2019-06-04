@@ -18,7 +18,8 @@
 #include <algorithm>
 
 #define MAP_OF_SEQ_MODEL		// TODO REMOVE ME
-#ifndef MAP_OF_SEQ_MODEL
+
+#ifdef MAP_OF_SEQ_MODEL
 
 
 
