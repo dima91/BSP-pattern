@@ -18,16 +18,16 @@
 #include <algorithm>
 #include <mutex>
 
+//#define MAP_OF_SEQ_MODEL		// TODO REMOVE ME
+
+#ifdef MAP_OF_SEQ_MODEL
+
 std::mutex outputMutex;
 
 #define PRINT(msg) {\
 	std::unique_lock<std::mutex> lock (outputMutex);\
 	std::cout << msg << std::endl;\
 }
-
-//#define MAP_OF_SEQ_MODEL		// TODO REMOVE ME
-
-#ifdef MAP_OF_SEQ_MODEL
 
 
 
@@ -42,7 +42,7 @@ public:
 	using CommunicationProtocols	= std::vector<std::vector<T>>;
 
 	// Defines the type of a general activity
-	using ActivityFunction			= std::function<void (int, int, int, std::vector<T>&)>;
+	using ActivityFunction			= std::function<void (int, int, int, int, std::vector<T>&)>;
 
 	/* Type of function called at the end of superstep to decide whether contiue execution or not
 	 * Arguments:
@@ -60,7 +60,8 @@ public:
 
 private:
 	// Holds the activity submitted by the user
-	std::vector<std::pair<ActivityFunction, std::function<CommunicationProtocols (int, int, int, std::vector<T>&)>>> activitiesFunctions;
+	std::vector<std::pair<ActivityFunction, std::function<CommunicationProtocols (int, int, int, int,
+																					std::vector<T>&)>>> activitiesFunctions;
 	Barrier startBarrier;
 	Barrier compPhaseBarrier;
 	Barrier commPhaseBarrier;
@@ -70,7 +71,8 @@ private:
 	// Function executed by a generic WorkerThread
 	void workerFunction (int index, std::vector<T> &inputVector, std::vector<LockableVector<T>> &outputVectors);
 
-	void subWorkerFunction (int idx, int start, int end, std::vector<T> &inputVector, std::vector<LockableVector<T>> &outputItems);
+	void subWorkerFunction (int idx, int subWIdx, int start, int end,
+								std::vector<T> &inputVector, std::vector<LockableVector<T>> &outputItems);
 
 	static std::atomic_int nextVectorToLock;
 
@@ -80,7 +82,7 @@ public:
 	~Superstep ();
 
 	int addActivity (ActivityFunction fun, CommunicationProtocols protocol);
-	int addActivity (ActivityFunction fun, std::function<CommunicationProtocols (int, int, int, std::vector<T>&)> protocol);
+	int addActivity (ActivityFunction fun, std::function<CommunicationProtocols (int, int, int, int, std::vector<T>&)> protocol);
 
 	/* Method to execute this current superstep. It requries a vector of workers on which the activity will be run,
 	 * a vector containing vector which hold input elements for that worker and a LockableVector on which will be
@@ -142,9 +144,9 @@ int Superstep<T>::addActivity (ActivityFunction fun, CommunicationProtocols prot
 
 
 template<typename T>
-int Superstep<T>::addActivity (ActivityFunction fun, std::function<CommunicationProtocols (int activityIndex, int start, int end,
+int Superstep<T>::addActivity (ActivityFunction fun, std::function<CommunicationProtocols (int, int, int, int,
 																							std::vector<T>&)> protocol) {
-	auto element	= std::make_pair<ActivityFunction, std::function<CommunicationProtocols (int, int , int , std::vector<T>&)>>
+	auto element	= std::make_pair<ActivityFunction, std::function<CommunicationProtocols (int, int, int,  int, std::vector<T>&)>>
 						(std::move(fun), std::move(protocol));
 	activitiesFunctions.emplace_back (std::move(element));
 	
@@ -193,18 +195,20 @@ int Superstep<T>::runStep (int q,
 
 	// Setting up worker threads
 	for (size_t i=0; i<activitiesFunctions.size(); i++) {
+		int k	= inputVectors[i].size()/q;
 		for (int j=0; j<q; j++) {
 			// Bind packaged task to arguments
-			auto lambdaFunction	= [&] (int index, int start, int end, std::vector<T> &inputItems, std::vector<LockableVector<T>> &outputItems) {
-				subWorkerFunction (index, start, end, inputItems, outputItems);
+			auto lambdaFunction	= [&] (int index, int subwWIdx, int start, int end, std::vector<T> &inputItems, std::vector<LockableVector<T>> &outputItems) {
+				subWorkerFunction (index, subwWIdx, start, end, inputItems, outputItems);
 			};
-			auto boundedFunction	= std::bind (lambdaFunction, i, -1, -1, std::ref(inputVectors[i]), std::ref(outputVectors));
+			auto startIdx			= (j*k);
+			auto endIdx				= ((j+1)*k);
+			auto boundedFunction	= std::bind (lambdaFunction, i, j, startIdx, endIdx, std::ref(inputVectors[i]), std::ref(outputVectors));
 			auto packagedTask		= std::packaged_task<void()> (boundedFunction);
 
 
 
 			// Assign created packaged_task to a worker
-			PRINT ("Assigning activity to " << (i*q)+j);
 			workers[(i*q)+j].assignActivity (std::move(packagedTask));
 		}
 	}
@@ -220,24 +224,80 @@ int Superstep<T>::runStep (int q,
 
 
 template<typename T>
-void Superstep<T>::subWorkerFunction (int idx, int start, int end, std::vector<T> &inputVector,
+void Superstep<T>::subWorkerFunction (int idx, int subWIdx, int start, int end, std::vector<T> &inputVector,
 										std::vector<LockableVector<T>> &outputItems) {
 	startBarrier.waitForFinish ();
 	
 	// ============================
 	// Performing computation phase
-	activitiesFunctions[idx].first (idx, start, end, inputVector);
+	//std::cout << "IVLen " << inputVector.size() << std::endl;
+	activitiesFunctions[subWIdx].first (idx, subWIdx, start, end, inputVector);
 	compPhaseBarrier.decreaseBarrier ();
 
 	// ==============================
 	// Performing communication phase
 	// Computing vector which defines the communication phase
-	CommunicationProtocols protocols	= activitiesFunctions[idx].second (idx, start, end, std::ref(inputVector));
-	commPhaseBarrier.decreaseBarrier ();
+	CommunicationProtocols protocols	= activitiesFunctions[idx].second (idx, subWIdx, start, end, std::ref(inputVector));
+
+	if (protocols.size() != 0) {
+		// Checking if a resize of outputvectors is needed
+		{
+			std::unique_lock<std::mutex> lock (outputVectorsMutex);
+			
+			if (protocols.size() > outputItems.size()) {
+				outputItems.resize (protocols.size ());
+			}
+		}
+
+		std::list<int> remainingActivities (protocols.size());
+		int idx	= 0;
+		std::iota (std::begin(remainingActivities), std::end(remainingActivities), idx++);
+
+
+		// TODO Try to drop the offset!
+		int vectorOffset	= (nextVectorToLock++) % remainingActivities.size();
+		while (remainingActivities.size() > 0) {
+			auto it	= std::begin (remainingActivities);
+			std::advance (it, vectorOffset);
+
+			while (it!=remainingActivities.end()) {
+
+				if (protocols[*it].size() == 0) {
+					remainingActivities.erase (it++);
+				}
+				else {
+					try {
+						// TODO Try to lock without tryLockAndGet
+						std::shared_ptr<LockedVector<T>> targetV	= outputItems[*it].tryLockAndGet();
+						auto &targetProtocol						= protocols[*it];
+						
+						// Inserting data at the end of target vector
+						for (auto i : targetProtocol) {
+							targetV->data.emplace_back (i);
+						}
+
+						remainingActivities.erase (it++);
+					} catch (std::logic_error &e) {
+						it++;
+					}
+				}
+			}
+			vectorOffset	= 0;
+		}
+	}
+
+		commPhaseBarrier.decreaseBarrier ();
 }
 
 
 #else
+
+extern std::mutex outputMutex;
+
+#define PRINT(msg) {\
+	std::unique_lock<std::mutex> lock (outputMutex);\
+	std::cout << msg << std::endl;\
+}
 
 
 template<typename T>
