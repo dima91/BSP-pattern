@@ -19,3 +19,9 @@ Makefile
 cmake_install.cmake
 
 *.zip
+mTimes
+msTimes
+seddedMTimes
+seddedMsTimes
+wholeMTimes
+wholeMsTimes
