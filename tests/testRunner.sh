@@ -37,6 +37,7 @@ done
 
 cat mTimes | grep whole > wholeMTimes
 sed -e 's/.*usec  (\([0-9]\+\).*/\1/' wholeMTimes > seddedMTimes
+cat seddedMTimes
 Msums=$(awk '{ sum += $1 } END { print sum }' seddedMTimes)
 
 
@@ -54,6 +55,7 @@ for ((i=0; i<$ITERATIONS; i++)) ; do
 done
 cat msTimes | grep whole > wholeMsTimes
 sed -e 's/.*usec  (\([0-9]\+\).*/\1/' wholeMsTimes > seddedMsTimes
+cat seddedMsTimes
 MSsums=$(awk '{ sum += $1 } END { print sum }' seddedMsTimes)
 
 
