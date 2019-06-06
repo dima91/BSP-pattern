@@ -1,6 +1,6 @@
 //#define MAP_TESTER			// First implementation
 //#define MAP_OF_SEQ_TESTER		// Second implementaton
-#define ACTIVITIES_NUMBER 10
+#define ACTIVITIES_NUMBER 5
 
 
 #ifdef MAP_TESTER
