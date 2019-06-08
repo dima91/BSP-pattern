@@ -6,7 +6,7 @@
 #ifdef MAP_TESTER
 
 
-#include <bsp.hpp>
+#include <bsp_both_impl.hpp>
 #include <uTimer.hpp>
 
 #include <iostream>
@@ -89,7 +89,7 @@ int main (int argn, char **argv) {
 #ifdef MAP_OF_SEQ_TESTER
 #define MAP_OF_SEQ_MODEL
 
-#include <bsp.hpp>
+#include <bsp_both_impl.hpp>
 #include <uTimer.hpp>
 
 #include <iostream>

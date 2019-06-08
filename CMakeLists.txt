@@ -24,7 +24,6 @@ add_library		(${PROJECT_NAME} STATIC $<TARGET_OBJECTS:${PROJECT_NAME}_objs>)
 ## Creating TiskinAlgorithm executable
 add_executable				(TiskinAlgorithm src/tiskin.cpp)
 target_link_libraries		(TiskinAlgorithm ${PROJECT_NAME})
-target_compile_definitions	(TiskinAlgorithm PRIVATE MAP_TESTER)
 
 # Creating unit tests executables
 add_executable			(BspTester	tests/bspTester.cpp)
