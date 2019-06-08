@@ -33,4 +33,4 @@ echo "Running testRun_32_16"
 ./tests/testRunner.sh $ITERATIONS $ELEMENTS 32 16 2 1 > testsResults/testRun_32_16
 
 echo "Running testRun_32_32"
-./tests/testRunner.sh $ITERATIONS $ELEMENTS 32 32 2 1 > testsResults/testRun_64_32
+./tests/testRunner.sh $ITERATIONS $ELEMENTS 32 32 2 1 > testsResults/testRun_32_32
