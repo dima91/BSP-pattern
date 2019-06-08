@@ -67,4 +67,4 @@ MSsums=$(awk '{ sum += $1 } END { print sum }' seddedMsTimes)
 echo -e "M sums\t"$Msums "-->  "$(( $Msums / $ITERATIONS ))
 echo -e "MS sums\t"$MSsums "-->  " $(( $MSsums / $ITERATIONS ))
 
-rm mTimes msTimes sedded*Times whole*Times
+rm sedded*Times whole*Times
