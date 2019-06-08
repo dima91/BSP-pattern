@@ -14,8 +14,6 @@
 
 #include <vector>
 
-//#define MAP_OF_SEQ_MODEL		// TODO  REMOVE ME!
-
 #ifdef MAP_OF_SEQ_MODEL
 
 

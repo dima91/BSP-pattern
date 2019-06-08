@@ -18,8 +18,6 @@
 #include <algorithm>
 #include <mutex>
 
-//#define MAP_OF_SEQ_MODEL		// TODO REMOVE ME
-
 #ifdef MAP_OF_SEQ_MODEL
 
 std::mutex outputMutex;
