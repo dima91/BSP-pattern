@@ -1,39 +1,52 @@
 #|/bin/bash
 
 ITERATIONS=5
-ELEMENTS=4096
 
-rm -fr testsResults
-mkdir testsResults
+rm -fr tiskin_testsResults
+mkdir tiskin_testsResults
+
 
 # Increasing performances
-echo "Running testRun_1_1"
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 1 1 2 1 > testsResults/testRun_1_1
+echo "Running testRun_2_20"
+ELEMENTS=$(echo '2^20' | bc)
+./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 256 10 > testsResults/testRun_2_20
 
-echo "Running testRun_2_1"
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 2 1 2 1 > testsResults/testRun_2_1
+echo "Running testRun_2_22"
+ELEMENTS=$(echo '2^22' | bc)
+./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 256 10 > testsResults/testRun_2_22
 
-echo "Running testRun_2_2"
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 2 2 2 1 > testsResults/testRun_2_2
+echo "Running testRun_2_24"
+ELEMENTS=$(echo '2^24' | bc)
+./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 256 10 > testsResults/testRun_2_24
 
-echo "Running testRun_4_4"
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 4 4 2 1 > testsResults/testRun_4_4
+echo "Running testRun_2_26"
+ELEMENTS=$(echo '2^26' | bc)
+./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 256 10 > testsResults/testRun_2_26
 
-echo "Running testRun_8_4"
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 8 4 2 1 > testsResults/testRun_8_4
+echo "Running testRun_2_28"
+ELEMENTS=$(echo '2^28' | bc)
+./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 256 10 > testsResults/testRun_2_28
 
-echo "Running testRun_8_8"
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 8 8 2 1 > testsResults/testRun_8_8
+echo "Running testRun_2_29"
+ELEMENTS=$(echo '2^29' | bc)
+./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 256 10 > testsResults/testRun_2_29
 
-echo "Running testRun_16_8"
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 16 8 2 1 > testsResults/testRun_16_8
+echo "Running testRun_2_30"
+ELEMENTS=$(echo '2^30' | bc)
+./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 256 10 > testsResults/testRun_2_30
 
-echo "Running testRun_16_16"
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 16 16 2 1 > testsResults/testRun_16_16
 
-# Decreasing performances
-echo "Running testRun_32_16"
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 32 16 2 1 > testsResults/testRun_32_16
 
-echo "Running testRun_32_32"
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 32 32 2 1 > testsResults/testRun_32_32
+
+echo "Running testRun_"
+ELEMENTS=$(echo '2^28' | bc)
+
+./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 64 10 > testsResults/testRun_p_64
+
+./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 32 10 > testsResults/testRun_p_64
+
+./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 128 10 > testsResults/testRun_p_128
+
+./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 256 10 > testsResults/testRun_p_256
+
+./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 512 10 > testsResults/testRun_p_512
