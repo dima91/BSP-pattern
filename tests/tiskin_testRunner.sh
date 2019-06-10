@@ -29,6 +29,12 @@ sed -e 's/.*usec  (\([0-9]\+\).*/\1/' wholeTimes > seddedTimes
 cat seddedTimes
 sums=$(awk '{ sum += $1 } END { print sum }' seddedTimes)
 
+echo -e "\n"
+cat tiskinTimes | grep "C++ sort algorithm computed in" > cppTimes
+sed -e 's/.*usec  (\([0-9]\+\).*/\1/' cppTimes > seddedCppTimes
+cat seddedCppTimes
+cppSums=$(awk '{ cppSum += $1 } END { print cppSum }' seddedCppTimes)
+
 
 ### ========================================
 ### ========================================
@@ -36,5 +42,6 @@ sums=$(awk '{ sum += $1 } END { print sum }' seddedTimes)
 
 
 echo -e "sums\t"$sums "-->  "$(( $sums / $ITERATIONS ))
+echo -e "cppSums\t"$cppSums "--> "$(( $cppSums / $ITERATIONS ))
 
-rm tiskinTimes wholeTimes 
+rm tiskinTimes wholeTimes seddedTimes cppTimes seddedCppTimes
