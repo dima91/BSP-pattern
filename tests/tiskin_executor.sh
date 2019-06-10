@@ -41,9 +41,9 @@ ELEMENTS=$(echo '2^30' | bc)
 echo "Running testRun_"
 ELEMENTS=$(echo '2^28' | bc)
 
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 64 10 > tiskin_testsResults/testRun_p_64
-
 ./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 32 10 > tiskin_testsResults/testRun_p_64
+
+./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 64 10 > tiskin_testsResults/testRun_p_64
 
 ./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 128 10 > tiskin_testsResults/testRun_p_128
 
