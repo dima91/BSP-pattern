@@ -26,6 +26,9 @@ add_executable				(TiskinAlgorithm src/tiskin.cpp)
 target_link_libraries		(TiskinAlgorithm ${PROJECT_NAME})
 
 # Creating unit tests executables
+add_executable				(TiskinTester src/tiskinTester.cpp)
+target_link_libraries		(TiskinTester ${PROJECT_NAME})
+
 add_executable			(BspTester	tests/bspTester.cpp)
 target_link_libraries	(BspTester	${PROJECT_NAME})
 
@@ -40,9 +43,11 @@ target_compile_definitions	(PerfEval_MS PRIVATE MAP_OF_SEQ_TESTER)
 
 if (${COMPUTE_SEQUENTIAL})
 	target_compile_definitions (TiskinAlgorithm PRIVATE COMPUTE_SEQUENTIAL)
+	target_compile_definitions (TiskinTester PRIVATE COMPUTE_SEQUENTIAL)
 endif ()
 
 
 if (${PRINT_FULL})
 	target_compile_definitions (TiskinAlgorithm PRIVATE PRINT_FULL)
+	target_compile_definitions (TiskinTester PRIVATE COMPUTE_SEQUENTIAL)
 endif ()
