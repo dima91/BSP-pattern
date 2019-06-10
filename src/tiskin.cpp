@@ -31,9 +31,8 @@
 #endif
 
 
-using el_t						= int;
-using IntVector					= std::vector<el_t>;
-using IntCommunicationProtocols	= Superstep<el_t>::CommunicationProtocols;
+using IntVector					= std::vector<int>;
+using IntCommunicationProtocols	= Superstep<int>::CommunicationProtocols;
 using CommunicationProtocolsFun	= std::function<IntCommunicationProtocols (IntVector &)>;
 using Parameters				= std::tuple<uint, uint, int, bool>;		// <n>  <p>  <seed>  <affinity>
 
@@ -118,6 +117,26 @@ void createRandomVector (IntVector &input, int seed) {
 
 
 
+/*void createRandomVector (IntVector &input, int seed) {
+	uint idx	= 0;
+	std::iota (input.begin(), input.end(), idx++);
+	std::mt19937 mt (seed);
+	std::uniform_int_distribution<int> dist (1, input.size()*10);
+
+	for (auto i=0; i<input.size(); i++) {
+		auto j		= dist(mt)%input.size();
+		auto tmp	= input[j];
+		input[j]	= input[i];
+		input[i]	= tmp;
+	}
+	
+	std::mt19937 engine (seed);
+	std::shuffle (std::begin (input), std::end(input), engine);
+}*/
+
+
+
+
 /* FIXME PIÙ LENTO MA PIÙ CORRETTO
 void createRandomVector (IntVector &input, int seed) {
     std::mt19937 mt (seed);
@@ -164,7 +183,7 @@ void findOutSeparators (IntVector &target, IntVector &source, uint n) {
 
 
 
-void setupBsp (BSP<el_t> &tAlg, uint n, uint p, int seed, IntVector &input,
+void setupBsp (BSP<int> &tAlg, uint n, uint p, int seed, IntVector &input,
 				std::vector<IntVector> &bspInputs, std::vector<IntVector> &bspOutputs) {
 	
 	std::random_device randomDevice;
@@ -200,7 +219,7 @@ void setupBsp (BSP<el_t> &tAlg, uint n, uint p, int seed, IntVector &input,
 	// ============================================================
 	// Superstep 0
 
-	BSP<el_t>::SuperstepPointer s0	= BSP<el_t>::SuperstepPointer (new Superstep<el_t> ());
+	BSP<int>::SuperstepPointer s0	= BSP<int>::SuperstepPointer (new Superstep<int> ());
 
 	for (uint i= 0; i<p; i++) {
 		s0->addActivity (
@@ -232,7 +251,7 @@ void setupBsp (BSP<el_t> &tAlg, uint n, uint p, int seed, IntVector &input,
 	// ============================================================
 	// Superstep 1 
 
-	BSP<el_t>::SuperstepPointer s1	= BSP<el_t>::SuperstepPointer (new Superstep<el_t> ());
+	BSP<int>::SuperstepPointer s1	= BSP<int>::SuperstepPointer (new Superstep<int> ());
 
 	for (uint i= 0; i<p; i++) {
 		s1->addActivity (
@@ -275,7 +294,7 @@ void setupBsp (BSP<el_t> &tAlg, uint n, uint p, int seed, IntVector &input,
 	// ============================================================
 	// Superstep 2
 
-	BSP<el_t>::SuperstepPointer s2	= BSP<el_t>::SuperstepPointer (new Superstep<el_t> ());
+	BSP<int>::SuperstepPointer s2	= BSP<int>::SuperstepPointer (new Superstep<int> ());
 
 	for (uint i= 0; i<p; i++) {
 		s2->addActivity (
@@ -326,7 +345,7 @@ int main (int argn, char **argv) {
 	if (cpusNum < p)
 		std::cout << "WARNING!\tTrying to create a set of workers which number is greater than number of CPUs!\n";
 
-	BSP<el_t> tiskinAlgorithm;
+	BSP<int> tiskinAlgorithm;
 	IntVector cppUnorderedVector;
 	IntVector unorderedVector;
 	IntVector orderedVector;
