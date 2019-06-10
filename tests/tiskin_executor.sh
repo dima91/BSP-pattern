@@ -53,15 +53,15 @@ echo "Running testRun_64_18"
 ELEMENTS=$(echo '2^18' | bc)
 ./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 64 10 > tiskin_testsResults/testRun_64_18
 
-echo "Running testRun_256_19"
+echo "Running testRun_64_19"
 ELEMENTS=$(echo '2^19' | bc)
 ./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 64 10 > tiskin_testsResults/testRun_64_19
 
-echo "Running testRun_256_20"
+echo "Running testRun_64_20"
 ELEMENTS=$(echo '2^20' | bc)
 ./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 64 10 > tiskin_testsResults/testRun_64_20
 
-echo "Running testRun_256_22"
+echo "Running testRun_64_22"
 ELEMENTS=$(echo '2^22' | bc)
 ./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 64 10 > tiskin_testsResults/testRun_64_22
 
