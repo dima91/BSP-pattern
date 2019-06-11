@@ -382,7 +382,6 @@ int main (int argn, char **argv) {
 	}
 
 
-	/*#ifdef COMPUTE_SEQUENTIAL
 	{
 		std::cout << std::endl <<
 					"=====================\n" <<
@@ -390,7 +389,6 @@ int main (int argn, char **argv) {
 		UTimer cppTimer ("C++ sort algorithm");
 		std::sort (originalVector.begin(), originalVector.end());
 	}
-	#endif*/
 
 	
 

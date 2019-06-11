@@ -23,7 +23,7 @@ The pattern must be tested executing the Tsikin BSP sortingalgorithm described a
 
 #### TODO list
 + [x] implement the two different activities composition;
-+ [ ] fix and include bsp testers, to test possibility to define different numbers of activities for each superstep and possibility to specify the next superstep to be exeuted, inside cmake and delivery script;
++ [x] fix and include bsp testers, to test possibility to define different numbers of activities for each superstep and to test possibility to specify the next superstep to be exeuted;
 + [ ] write the report;
 + [ ] try to [lock or trylock] with a precentage of 0.5
 + [ ] make graphs with xtics and ytics (as in plot_CT.plot);

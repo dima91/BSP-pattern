@@ -152,10 +152,12 @@ void BSP<T>::runAndWait (std::vector<std::vector<T>> &input, std::vector<std::ve
 			else if (retVal == EOC_FLAG) {
 				swapVectors (input, lockableVectors);
 			}
-			else {
+			else if (retVal>=0) {
 				nextStep	= retVal;
 				swapVectors (input, lockableVectors);
 			}
+			else
+				throw std::runtime_error ("Wrong number of superstep returned by 'atExit' function");
 		}
 	}
 

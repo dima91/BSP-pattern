@@ -6,11 +6,15 @@
 #include <algorithm>
 #include <random>
 
-#define SIMPLE_TESTER
-//#define BSP_DIFFERENT_ACTIVITIES_NUMBER
-
-
-#ifdef SIMPLE_TESTER
+#define BSP_PRINT_V(lbl, vec, footer) {\
+	{\
+		std::unique_lock<std::mutex> lock (outputMutex);\
+		std::cout << lbl << std::flush;\
+		for (auto el : vec)\
+			std::cout << el << " " << std::flush;\
+		std::cout << std::endl << footer;\
+	}\
+}
 
 
 using IntActivityFunction			= Superstep<int>::ActivityFunction;
@@ -18,34 +22,54 @@ using IntCommunicationProtocol		= Superstep<int>::CommunicationProtocols;
 using IntCommunicationProtocolFun	= std::function<Superstep<int>::CommunicationProtocols (int, std::vector<int> &)>;
 
 
+// Function to test possibility to customize 'atExit' superstep function
+void testAtExitFunction ();
+
+// Function to test different number of activities in different supersteps
+void testDifferentNumber ();
+
+
+std::mutex outputMutex;
+
+
 
 int main (int argn, char **argv) {
-	std::cout << "Hello user!\n";
+	
+	testAtExitFunction ();
+
+	testDifferentNumber ();
+
+	return 0;
+}
+
+
+
+
+
+
+
+
+void testAtExitFunction () {
 
 	BSP<int> bspPattern;
 
 	BSP<int>::SuperstepPointer s0	= BSP<int>::SuperstepPointer (new Superstep<int> ());
 	BSP<int>::SuperstepPointer s1	= BSP<int>::SuperstepPointer (new Superstep<int> ());
+	BSP<int>::SuperstepPointer s2	= BSP<int>::SuperstepPointer (new Superstep<int> ());
 
 
-	for (int i=0; i<4; i++) {
+	for (int i=0; i<2; i++) {
 		// ==============
 		// First activity
-		IntActivityFunction aFun	= IntActivityFunction ([] (int actIdx, std::vector<int> &inputs) {
+		auto aFun		= IntActivityFunction ([] (int actIdx, std::vector<int> &inputs) {
 			for (size_t i=0; i<inputs.size(); i++) {
 				inputs[i]	= pow (inputs[i], 2);
 			}
 			return ;
 		});
-		auto aComFun	= IntCommunicationProtocolFun ([i] (int actIdx, std::vector<int> els) {
-				std::random_device random_device;
-				std::mt19937 engine{random_device()};
-				std::uniform_int_distribution<int> dist(1000, 1001);
-				//std::this_thread::sleep_for (std::chrono::milliseconds (dist(engine)));
-
-				IntCommunicationProtocol cp (4);
-				cp[(i+1)%4] = {els[0], els[1]};
-
+		auto aComFun	= IntCommunicationProtocolFun ([] (int actIdx, std::vector<int> els) {
+				IntCommunicationProtocol cp (2);
+				cp[(actIdx+1)%2] = {els[0], els[1]};
 				return cp;
 		});
 		s0->addActivity (aFun, aComFun);
@@ -53,125 +77,93 @@ int main (int argn, char **argv) {
 
 		// ===============
 		// Second activity
-		IntActivityFunction bFun	= IntActivityFunction ([] (int actIdx, std::vector<int> &inputs) {
+		auto bFun		= IntActivityFunction ([] (int actIdx, std::vector<int> &inputs) {
 			for (size_t i=0; i<inputs.size(); i++) {
 				inputs[i]	= pow (inputs[i], 0.5);
 			}
 			return ;
 		});
-		auto bComFun	= IntCommunicationProtocolFun ([i] (int actIdx, std::vector<int> els) {
-			std::random_device random_device;
-			std::mt19937 engine{random_device()};
-			std::uniform_int_distribution<int> dist(100, 300);
-			//std::this_thread::sleep_for (std::chrono::milliseconds (dist(engine)));
-
-			IntCommunicationProtocol cp (4);
-			cp[(i-1+4)%4] = {els[0], els[1]};
-
+		auto bComFun	= IntCommunicationProtocolFun ([] (int actIdx, std::vector<int> els) {
+			IntCommunicationProtocol cp (2);
+			cp[(actIdx-1+2)%2] = {els[0], els[1]};
 			return cp;
 		});
 		s1->addActivity (bFun, bComFun);
 	}
 
-	/*s0->setAtExitFunction ([] (std::vector<LockableVector<int>> &outV) {
+	/* Creating a third activity which wll never executed */
+	auto compFun	= IntActivityFunction ([] (int actIdx, std::vector<int> &inputs) {
+		std::cout << "This computation function will not be executed\n";
+		return ;
+	});
+	auto commFun	= IntCommunicationProtocolFun ([] (int actIdx, std::vector<int> els) {
+		IntCommunicationProtocol cp (2);
+		std::cout << "This communication function will not be executed\n";
+		return cp;
+	});
+	s2->addActivity (compFun, commFun);
+
+	s1->setAtExitFunction ([] (std::vector<LockableVector<int>> &outV) {
 		return -1;
-	});*/
-	/*s1->setAtExitFunction ([] (std::vector<LockableVector<int>> &outV) {
-		return 0;
-	});*/
+	});
 
-	std::cout << "Superstep id:  " << bspPattern.addSuperstep (std::move(s0)) << std::endl;
-	std::cout << "Superstep id:  " << bspPattern.addSuperstep (std::move(s1)) << std::endl;
+	std::cout << "Inserted superstep with id:  " << bspPattern.addSuperstep (std::move(s0)) << std::endl;
+	std::cout << "Inserted superstep with id:  " << bspPattern.addSuperstep (std::move(s1)) << std::endl;
+	std::cout << "Inserted superstep with id:  " << bspPattern.addSuperstep (std::move(s2)) << std::endl;
 
 
 
-	std::vector<std::vector<int>>  inputVectors (4),  outputVectors (4);
+	std::vector<std::vector<int>>  inputVectors (2),  outputVectors (2);
 
 	inputVectors[0].push_back (1);
 	inputVectors[0].push_back (2);
 	inputVectors[1].push_back (3);
 	inputVectors[1].push_back (4);
-	inputVectors[2].push_back (5);
-	inputVectors[2].push_back (6);
-	inputVectors[3].push_back (7);
-	inputVectors[3].push_back (8);
 
-	std::cout << "Starting input vectors..\n";
+	/*std::cout << "Input vectors..\n";
 	for (size_t i=0; i<inputVectors.size(); i++) {
-		std::cout << i << " >  ";
-		for (auto el : inputVectors[i])
-			std::cout << el << "\t";
-		std::cout << std::endl;
-	}
+		BSP_PRINT_V (i << " >  ", inputVectors[i], "")
+	}*/
 
 	bspPattern.runAndWait (inputVectors, outputVectors, false);
 
 
 
-	std::cout << "Output vectors..\n";
+	/*std::cout << "\n\nOutput vectors..\n";
 	for (size_t i=0; i<outputVectors.size(); i++) {
-		std::cout << i << " >  ";
-		for (auto el : outputVectors[i])
-			std::cout << el << "\t";
-		std::cout << std::endl;
-	}
-
-	return 0;
+		BSP_PRINT_V (i << " >  ", outputVectors[i], "")
+	}*/
 }
 
 
-#endif
 
 
 
 
-#ifdef BSP_DIFFERENT_ACTIVITIES_NUMBER
 
 
-#define TISKIN_PRINT_V(lbl, vec, footer) {\
-	std::unique_lock<std::mutex> lock (outputMutex);\
-	std::cout << lbl << std::flush;\
-	for (auto el : vec)\
-		std::cout << el << " " << std::flush;\
-	std::cout << std::endl << footer;\
-}
+void testDifferentNumber () {
+	std::vector<int> input (20);
+	std::vector<std::vector<int>> bspInputs, bspOutputs;
+	BSP<int> bspPattern;
 
-using IntVector					= std::vector<int>;
-using IntCommunicationProtocol	= Superstep<int>::CommunicationProtocols;
-
-std::mutex outputMutex;
-
-
-void setupBsp (BSP<int> &sTester, IntVector &input,	std::vector<IntVector> &bspInputs, std::vector<IntVector> &bspOutputs) {
-	
 	std::random_device randomDevice;
+
+	int idx	= 0;
+	std::iota (input.begin(), input.end(), idx++);
 	
-	{
-		UTimer randomVector ("Creating random vector");
-		int idx	= 0;
-		std::iota (input.begin(), input.end(), idx++);
-	}
+	bspInputs	= std::vector<std::vector<int>> (2);
+	bspOutputs	= std::vector<std::vector<int>> (1);
 
+	uint actInputLen	= 5;
+	for (uint i=0; i<2; i++) {
+		bspInputs[i]	= std::vector<int> (actInputLen);
+		auto &vI		= bspInputs[i];
+		for (uint j=0; j<actInputLen; j++) {
 
-	{
-		UTimer bspInputVectors ("Creating BSP input vectors");
-		
-		bspInputs	= std::vector<IntVector> (4);
-		bspOutputs	= std::vector<IntVector> (4);
-
-		uint actInputLen	= 5;
-		for (uint i=0; i<4; i++) {
-			bspInputs[i]	= IntVector (actInputLen);
-			auto &vI		= bspInputs[i];
-			for (uint j=0; j<actInputLen; j++) {
-
-				vI[j]	= input[(actInputLen*i)+j];
-			}
+			vI[j]	= input[(actInputLen*i)+j];
 		}
 	}
-
-
-	UTimer superstepCreator ("Creating supersteps");
 
 
 	// ============================================================
@@ -180,29 +172,23 @@ void setupBsp (BSP<int> &sTester, IntVector &input,	std::vector<IntVector> &bspI
 
 	BSP<int>::SuperstepPointer s0	= BSP<int>::SuperstepPointer (new Superstep<int> ());
 
-	for (uint i= 0; i<4; i++) {
+	for (uint i= 0; i<2; i++) {
 		s0->addActivity (
-			[] (uint activityIndex, IntVector &actInput) {
-				TISKIN_PRINT_V ("Input vector of activity " << activityIndex << ": ", actInput, "");
+			[] (uint activityIndex, std::vector<int> &actInput) {
+				BSP_PRINT_V ("Input vector of activity " << activityIndex << ": ", actInput, "");
 			},
-			[] (uint activityIndex, IntVector &elements) {
-				//TISKIN_PRINT_V ("Input vector of activity " << activityIndex << ": ", actInput, "");
-				IntCommunicationProtocol cp (5);
+			[] (uint activityIndex, std::vector<int> &elements) {
+				IntCommunicationProtocol cp (3);
 				for (auto el: elements) {
 					cp[activityIndex].push_back (el);
 					cp[activityIndex+1].push_back (el);
 				}
-
-				TISKIN_PRINT_V ("Output vector from " << activityIndex << " to " << activityIndex << ": ", cp[activityIndex], "");
-				TISKIN_PRINT_V ("Output vector from " << activityIndex << " to " << activityIndex+1 << ": ", cp[activityIndex+1], "");
-				
-
 				return cp;
 			}
 		);
 	}
 
-	sTester.addSuperstep (std::move(s0));
+	bspPattern.addSuperstep (std::move(s0));
 
 
 	// ============================================================
@@ -211,14 +197,14 @@ void setupBsp (BSP<int> &sTester, IntVector &input,	std::vector<IntVector> &bspI
 
 	BSP<int>::SuperstepPointer s1	= BSP<int>::SuperstepPointer (new Superstep<int> ());
 
-	for (uint i= 0; i<5; i++) {
+	for (uint i= 0; i<3; i++) {
 		s1->addActivity (
-			[] (uint activityIndex, IntVector &actInput) {
-				TISKIN_PRINT_V ("Input vector of activity " << activityIndex << ": ", actInput, "");
+			[] (uint activityIndex, std::vector<int> &actInput) {
+				BSP_PRINT_V ("Input vector of activity " << activityIndex << ": ", actInput, "");
 			},
-			([] (uint activityIndex, IntVector &elements) {
+			([] (uint activityIndex, std::vector<int> &elements) {
 				//TISKIN_PRINT_V ("Input vector of activity " << activityIndex << ": ", actInput, "");
-				std::vector<IntVector> cp (1);
+				std::vector<std::vector<int>> cp (1);
 				for (auto el: elements) {
 					cp[0].push_back (el);
 				}
@@ -228,22 +214,20 @@ void setupBsp (BSP<int> &sTester, IntVector &input,	std::vector<IntVector> &bspI
 		);
 	}
 
-	sTester.addSuperstep (std::move(s1));
+	bspPattern.addSuperstep (std::move(s1));
 
 
 	// ============================================================
 	// ============================================================
 	// Superstep 2
-
 	BSP<int>::SuperstepPointer s2	= BSP<int>::SuperstepPointer (new Superstep<int> ());
 
 	s2->addActivity (
-		[] (uint activityIndex, IntVector &actInput) {
-			TISKIN_PRINT_V ("Input vector of activity " << activityIndex << ": ", actInput, "");
-			std::cout << "Len: " << actInput.size() << std::endl;
+		[] (uint activityIndex, std::vector<int> &actInput) {
+			BSP_PRINT_V ("Input vector of activity " << activityIndex << ": ", actInput, "");
 		},
-		([] (uint activityIndex, IntVector &elements) {
-			std::vector<IntVector> cp (1);
+		([] (uint activityIndex, std::vector<int> &elements) {
+			std::vector<std::vector<int>> cp (1);
 
 			for (auto e : elements)
 				cp[0].push_back (e);
@@ -252,27 +236,7 @@ void setupBsp (BSP<int> &sTester, IntVector &input,	std::vector<IntVector> &bspI
 		})
 	);
 
-	sTester.addSuperstep (std::move(s2));
-}
-
-
-
-int main (int argn, char **argv) {
-
-	IntVector input (20);
-	std::vector<IntVector> bspInputs, bspOutputs;
-	BSP<int> bspPattern;
-
-	setupBsp (std::ref(bspPattern), input, bspInputs, bspOutputs);
+	bspPattern.addSuperstep (std::move(s2));
 
 	bspPattern.runAndWait (bspInputs, bspOutputs, false);
-
-	std::cout << "Output size: " << bspOutputs.size () << std::endl;
-
-	std::cout << "\nBye bye!\n";
-
-	return 0;
 }
-
-
-#endif
