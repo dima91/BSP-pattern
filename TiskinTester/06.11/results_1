@@ -1,0 +1,121 @@
+Using a vector of   size 1073741824     and     1 processors,   with   seed=100   and   affinity=0
+
+Creating random vector computed in 308675181 usec  (308675 milliseconds)
+
+
+
+
+
+=================================
+Starting computation with currP = 1
+
+
+Running superstep  0
+Superstep 0 computed in 252692344 usec  (252692 milliseconds)
+
+
+Running superstep  1
+Superstep 1 computed in 25745705 usec  (25745 milliseconds)
+
+
+Running superstep  2
+Superstep 2 computed in 110150666 usec  (110150 milliseconds)
+
+
+*************************************** Whole algorithm computed in 388648511 usec  (388648 milliseconds)
+
+
+
+
+
+=================================
+Starting computation with currP = 1
+
+
+Running superstep  0
+Superstep 0 computed in 251761805 usec  (251761 milliseconds)
+
+
+Running superstep  1
+Superstep 1 computed in 25768841 usec  (25768 milliseconds)
+
+
+Running superstep  2
+Superstep 2 computed in 110067841 usec  (110067 milliseconds)
+
+
+*************************************** Whole algorithm computed in 387666164 usec  (387666 milliseconds)
+
+
+
+
+
+=================================
+Starting computation with currP = 1
+
+
+Running superstep  0
+Superstep 0 computed in 251898459 usec  (251898 milliseconds)
+
+
+Running superstep  1
+Superstep 1 computed in 25709744 usec  (25709 milliseconds)
+
+
+Running superstep  2
+Superstep 2 computed in 109978664 usec  (109978 milliseconds)
+
+
+*************************************** Whole algorithm computed in 387653897 usec  (387653 milliseconds)
+
+
+
+
+
+=================================
+Starting computation with currP = 1
+
+
+Running superstep  0
+Superstep 0 computed in 251080088 usec  (251080 milliseconds)
+
+
+Running superstep  1
+Superstep 1 computed in 25612855 usec  (25612 milliseconds)
+
+
+Running superstep  2
+Superstep 2 computed in 109733663 usec  (109733 milliseconds)
+
+
+*************************************** Whole algorithm computed in 386493335 usec  (386493 milliseconds)
+
+
+
+
+
+=================================
+Starting computation with currP = 1
+
+
+Running superstep  0
+Superstep 0 computed in 251103282 usec  (251103 milliseconds)
+
+
+Running superstep  1
+Superstep 1 computed in 25639314 usec  (25639 milliseconds)
+
+
+Running superstep  2
+Superstep 2 computed in 109619796 usec  (109619 milliseconds)
+
+
+*************************************** Whole algorithm computed in 386429970 usec  (386429 milliseconds)
+
+=====================
+C++ sorting algorithm
+C++ sort algorithm computed in 250060427 usec  (250060 milliseconds)
+
+
+
+Bye bye!

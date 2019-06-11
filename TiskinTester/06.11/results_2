@@ -1,0 +1,117 @@
+Using a vector of   size 1073741824     and     2 processors,   with   seed=100   and   affinity=0
+
+Creating random vector computed in 311030986 usec  (311030 milliseconds)
+
+
+
+
+
+=============================
+Starting computation with i = 2
+
+
+Running superstep  0
+Superstep 0 computed in 128805165 usec  (128805 milliseconds)
+
+
+Running superstep  1
+Superstep 1 computed in 14822884 usec  (14822 milliseconds)
+
+
+Running superstep  2
+Superstep 2 computed in 229876620 usec  (229876 milliseconds)
+
+
+*************************************** Whole algorithm computed in 373576333 usec  (373576 milliseconds)
+
+
+
+
+
+=============================
+Starting computation with i = 2
+
+
+Running superstep  0
+Superstep 0 computed in 128034951 usec  (128034 milliseconds)
+
+
+Running superstep  1
+Superstep 1 computed in 14760410 usec  (14760 milliseconds)
+
+
+Running superstep  2
+Superstep 2 computed in 229811457 usec  (229811 milliseconds)
+
+
+*************************************** Whole algorithm computed in 372676065 usec  (372676 milliseconds)
+
+
+
+
+
+=============================
+Starting computation with i = 2
+
+
+Running superstep  0
+Superstep 0 computed in 128139576 usec  (128139 milliseconds)
+
+
+Running superstep  1
+Superstep 1 computed in 14807257 usec  (14807 milliseconds)
+
+
+Running superstep  2
+Superstep 2 computed in 230407948 usec  (230407 milliseconds)
+
+
+*************************************** Whole algorithm computed in 373424434 usec  (373424 milliseconds)
+
+
+
+
+
+=============================
+Starting computation with i = 2
+
+
+Running superstep  0
+Superstep 0 computed in 128112524 usec  (128112 milliseconds)
+
+
+Running superstep  1
+Superstep 1 computed in 14784817 usec  (14784 milliseconds)
+
+
+Running superstep  2
+Superstep 2 computed in 229945731 usec  (229945 milliseconds)
+
+
+*************************************** Whole algorithm computed in 372912908 usec  (372912 milliseconds)
+
+
+
+
+
+=============================
+Starting computation with i = 2
+
+
+Running superstep  0
+Superstep 0 computed in 128016164 usec  (128016 milliseconds)
+
+
+Running superstep  1
+Superstep 1 computed in 14920876 usec  (14920 milliseconds)
+
+
+Running superstep  2
+Superstep 2 computed in 225182549 usec  (225182 milliseconds)
+
+
+*************************************** Whole algorithm computed in 368189982 usec  (368189 milliseconds)
+
+
+
+Bye bye!
