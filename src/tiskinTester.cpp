@@ -15,6 +15,9 @@
 #include <algorithm>
 
 
+#define ITERATIONS 5
+
+
 
 #ifdef PRINT_FULL
 	#define TISKIN_PRINT_V(lbl, vec, footer) {\
@@ -325,15 +328,15 @@ int main (int argn, char **argv) {
 
 
 	uint n			= std::get<0> (parameters);
-	uint maxP		= std::get<1> (parameters);
+	uint p			= std::get<1> (parameters);
 	int seed		= std::get<2> (parameters);
 	bool affinity	= std::get<3> (parameters);
 
-	std::cout << "Using a vector of   size " << n << "   and at maximum "  << maxP << " processors,  "
+	std::cout << "Using a vector of   size " << n << "     and     "  << p << " processors,  "
 					" with   seed=" << seed << "   and   affinity=" << affinity << std::endl << std::endl;
 
 	uint cpusNum	= std::thread::hardware_concurrency();
-	if (cpusNum < maxP)
+	if (cpusNum < p)
 		std::cout << "WARNING!\tTrying to create a set of workers which number is greater than number of CPUs!\n";
 
 	
@@ -346,8 +349,7 @@ int main (int argn, char **argv) {
 	}
 
 
-	uint currP	= 1;
-	while (currP <= maxP) {
+	for (auto i=0; i<ITERATIONS; i++) {
 		BSP<int> tiskinAlgorithm;
 		IntVector cppUnorderedVector;
 		IntVector unorderedVector;
@@ -359,10 +361,7 @@ int main (int argn, char **argv) {
 
 		{
 			unorderedVector	= originalVector;
-			setupBsp (std::ref(tiskinAlgorithm), n, currP, seed, std::ref(unorderedVector), std::ref(bspInput), std::ref(bspOutput));	
-			#ifdef COMPUTE_SEQUENTIAL
-			cppUnorderedVector	= unorderedVector;
-			#endif
+			setupBsp (std::ref(tiskinAlgorithm), n, p, seed, std::ref(unorderedVector), std::ref(bspInput), std::ref(bspOutput));
 		}
 
 		TISKIN_PRINT_V ("Algorithm's input vector:\n", unorderedVector, "\n");
@@ -370,7 +369,7 @@ int main (int argn, char **argv) {
 		{
 			std::cout << std::endl <<
 						"\n\n\n\n=================================\n" <<
-						"Starting computation with currP = " << currP << std::endl;
+						"Starting computation with currP = " << p << std::endl;
 			UTimer computationTimer ("*************************************** Whole algorithm");
 			tiskinAlgorithm.runAndWait (std::ref(bspInput), std::ref(bspOutput), affinity);
 			std::cout << std::endl << std::endl;
@@ -380,8 +379,6 @@ int main (int argn, char **argv) {
 			orderedVector.insert (orderedVector.end(), out.begin(), out.end());
 		}
 		TISKIN_PRINT_V ("Algorithm's output vector:\n", orderedVector, "\n");
-
-		currP	= currP*2;
 	}
 
 

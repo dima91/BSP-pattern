@@ -1,0 +1,176 @@
+Using a vector of   size 1073741824   and at maximum 1024 processors,   with   seed=-1   and   affinity=0
+
+WARNING!	Trying to create a set of workers which number is greater than number of CPUs!
+Creating random vector computed in 308245867 usec  (308245 milliseconds)
+
+
+
+
+
+=================================
+Starting computation with currP = 1
+
+
+Running superstep  0
+Superstep 0 computed in 251477268 usec  (251477 milliseconds)
+
+
+Running superstep  1
+Superstep 1 computed in 25936072 usec  (25936 milliseconds)
+
+
+Running superstep  2
+Superstep 2 computed in 110203502 usec  (110203 milliseconds)
+
+
+*************************************** Whole algorithm computed in 387683089 usec  (387683 milliseconds)
+
+
+
+
+
+=================================
+Starting computation with currP = 2
+
+
+Running superstep  0
+Superstep 0 computed in 127610054 usec  (127610 milliseconds)
+
+
+Running superstep  1
+Superstep 1 computed in 14962451 usec  (14962 milliseconds)
+
+
+Running superstep  2
+Superstep 2 computed in 237549487 usec  (237549 milliseconds)
+
+
+*************************************** Whole algorithm computed in 380193255 usec  (380193 milliseconds)
+
+
+
+
+
+=================================
+Starting computation with currP = 4
+
+
+Running superstep  0
+Superstep 0 computed in 62537274 usec  (62537 milliseconds)
+
+
+Running superstep  1
+Superstep 1 computed in 7570761 usec  (7570 milliseconds)
+
+
+Running superstep  2
+Superstep 2 computed in 64951014 usec  (64951 milliseconds)
+
+
+*************************************** Whole algorithm computed in 135116464 usec  (135116 milliseconds)
+
+
+
+
+
+=================================
+Starting computation with currP = 8
+
+
+Running superstep  0
+Superstep 0 computed in 31049748 usec  (31049 milliseconds)
+
+
+Running superstep  1
+Superstep 1 computed in 3812197 usec  (3812 milliseconds)
+
+
+Running superstep  2
+Superstep 2 computed in 25435439 usec  (25435 milliseconds)
+
+
+*************************************** Whole algorithm computed in 60348721 usec  (60348 milliseconds)
+
+
+
+
+
+=================================
+Starting computation with currP = 16
+
+
+Running superstep  0
+Superstep 0 computed in 15633564 usec  (15633 milliseconds)
+
+
+Running superstep  1
+Superstep 1 computed in 2368787 usec  (2368 milliseconds)
+
+
+Running superstep  2
+Superstep 2 computed in 14856806 usec  (14856 milliseconds)
+
+
+*************************************** Whole algorithm computed in 32907861 usec  (32907 milliseconds)
+
+
+
+
+
+=================================
+Starting computation with currP = 32
+
+
+Running superstep  0
+Superstep 0 computed in 8241437 usec  (8241 milliseconds)
+
+
+Running superstep  1
+Superstep 1 computed in 1738731 usec  (1738 milliseconds)
+
+
+Running superstep  2
+Superstep 2 computed in 17610978 usec  (17610 milliseconds)
+
+
+*************************************** Whole algorithm computed in 27661996 usec  (27661 milliseconds)
+
+
+
+
+
+=================================
+Starting computation with currP = 64
+
+
+Running superstep  0
+Superstep 0 computed in 4784309 usec  (4784 milliseconds)
+
+
+Running superstep  1
+Superstep 1 computed in 2441352 usec  (2441 milliseconds)
+
+
+Running superstep  2
+Superstep 2 computed in 22426780 usec  (22426 milliseconds)
+
+
+*************************************** Whole algorithm computed in 30288358 usec  (30288 milliseconds)
+
+
+
+
+
+=================================
+Starting computation with currP = 128
+
+
+Running superstep  0
+Superstep 0 computed in 3518899 usec  (3518 milliseconds)
+
+
+Running superstep  1
+Superstep 1 computed in 2314172 usec  (2314 milliseconds)
+
+
+Running superstep  2
