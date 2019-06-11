@@ -368,21 +368,21 @@ int main (int argn, char **argv) {
 
 		{
 			std::cout << std::endl <<
-						"\n\n\n\n=================================\n" <<
-						"Starting computation with currP = " << p << std::endl;
+						"\n\n\n\n=============================\n" <<
+						"Starting computation with i = " << i << std::endl;
 			UTimer computationTimer ("*************************************** Whole algorithm");
 			tiskinAlgorithm.runAndWait (std::ref(bspInput), std::ref(bspOutput), affinity);
 			std::cout << std::endl << std::endl;
 		}
 
-		for (auto out : bspOutput) {
+		/*for (auto out : bspOutput) {
 			orderedVector.insert (orderedVector.end(), out.begin(), out.end());
-		}
+		}*/
 		TISKIN_PRINT_V ("Algorithm's output vector:\n", orderedVector, "\n");
 	}
 
 
-	#ifdef COMPUTE_SEQUENTIAL
+	/*#ifdef COMPUTE_SEQUENTIAL
 	{
 		std::cout << std::endl <<
 					"=====================\n" <<
@@ -390,7 +390,7 @@ int main (int argn, char **argv) {
 		UTimer cppTimer ("C++ sort algorithm");
 		std::sort (originalVector.begin(), originalVector.end());
 	}
-	#endif
+	#endif*/
 
 	
 
