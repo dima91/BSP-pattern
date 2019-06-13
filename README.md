@@ -25,5 +25,5 @@ The pattern must be tested executing the Tsikin BSP sortingalgorithm described a
 + [x] implement the two different activities composition;
 + [x] fix and include bsp testers, to test possibility to define different numbers of activities for each superstep and to test possibility to specify the next superstep to be exeuted;
 + [x] write the report;
-+ [ ] try to [lock or trylock] with a precentage of 0.5
++ [ ] ~~try to lock or trylock with a precentage of 0.5~~
 + [ ] make graphs with xtics and ytics (as in plot_CT.plot);
