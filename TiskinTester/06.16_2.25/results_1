@@ -1,0 +1,121 @@
+Using a vector of   size 33554432     and     1 processors,   with   seed=100   and   affinity=0
+
+Creating random vector computed in 8474934 usec  (8474 milliseconds)
+
+
+
+
+
+=============================
+Starting computation with i = 0
+
+
+Running superstep  0
+Superstep 0 computed in 6673704 usec  (6673 milliseconds)
+
+
+Running superstep  1
+Superstep 1 computed in 809324 usec  (809 milliseconds)
+
+
+Running superstep  2
+Superstep 2 computed in 2992979 usec  (2992 milliseconds)
+
+
+*************************************** Whole algorithm computed in 10480564 usec  (10480 milliseconds)
+
+
+
+
+
+=============================
+Starting computation with i = 1
+
+
+Running superstep  0
+Superstep 0 computed in 6587944 usec  (6587 milliseconds)
+
+
+Running superstep  1
+Superstep 1 computed in 793311 usec  (793 milliseconds)
+
+
+Running superstep  2
+Superstep 2 computed in 2956313 usec  (2956 milliseconds)
+
+
+*************************************** Whole algorithm computed in 10342093 usec  (10342 milliseconds)
+
+
+
+
+
+=============================
+Starting computation with i = 2
+
+
+Running superstep  0
+Superstep 0 computed in 6573271 usec  (6573 milliseconds)
+
+
+Running superstep  1
+Superstep 1 computed in 793213 usec  (793 milliseconds)
+
+
+Running superstep  2
+Superstep 2 computed in 2958030 usec  (2958 milliseconds)
+
+
+*************************************** Whole algorithm computed in 10328894 usec  (10328 milliseconds)
+
+
+
+
+
+=============================
+Starting computation with i = 3
+
+
+Running superstep  0
+Superstep 0 computed in 6619406 usec  (6619 milliseconds)
+
+
+Running superstep  1
+Superstep 1 computed in 790933 usec  (790 milliseconds)
+
+
+Running superstep  2
+Superstep 2 computed in 2949569 usec  (2949 milliseconds)
+
+
+*************************************** Whole algorithm computed in 10364380 usec  (10364 milliseconds)
+
+
+
+
+
+=============================
+Starting computation with i = 4
+
+
+Running superstep  0
+Superstep 0 computed in 6589055 usec  (6589 milliseconds)
+
+
+Running superstep  1
+Superstep 1 computed in 796427 usec  (796 milliseconds)
+
+
+Running superstep  2
+Superstep 2 computed in 2951561 usec  (2951 milliseconds)
+
+
+*************************************** Whole algorithm computed in 10341492 usec  (10341 milliseconds)
+
+=====================
+C++ sorting algorithm
+C++ sort algorithm computed in 6550187 usec  (6550 milliseconds)
+
+
+
+Bye bye!

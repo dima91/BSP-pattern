@@ -27,3 +27,5 @@ The pattern must be tested executing the Tsikin BSP sortingalgorithm described a
 + [x] write the report;
 + [ ] ~~try to lock or trylock with a precentage of 0.5~~
 + [ ] make graphs with xtics and ytics (as in plot_CT.plot);
++ [ ] make a graph with bspTestEvalResults/results_06.13
++ [ ] make a graph with TiskinTester/06.16_2.25 && TiskinTester/06.16_2.30

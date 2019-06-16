@@ -1,94 +1,86 @@
 #|/bin/bash
 
-ITERATIONS=5
+## 2^25
+echo "Running TiskinTester 1"
+./bin/TiskinTester 33554432 1 -s 100 > TiskinTester/06.16_2.25/results_1
+sleep 5
 
-rm -fr tiskin_testsResults
-mkdir tiskin_testsResults
+echo "Running TiskinTester 2"
+./bin/TiskinTester 33554432 2 -s 100 > TiskinTester/06.16_2.25/results_2
+sleep 5
 
+echo "Running TiskinTester 4"
+./bin/TiskinTester 33554432 4 -s 100 > TiskinTester/06.16_2.25/results_4
+sleep 5
 
-# Increasing performances
-echo "Running testRun_256_20"
-ELEMENTS=$(echo '2^20' | bc)
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 256 10 > tiskin_testsResults/testRun_256_20
+echo "Running TiskinTester 8"
+./bin/TiskinTester 33554432 8 -s 100 > TiskinTester/06.16_2.25/results_8
+sleep 5
 
-echo "Running testRun_256_22"
-ELEMENTS=$(echo '2^22' | bc)
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 256 10 > tiskin_testsResults/testRun_256_22
+echo "Running TiskinTester 16"
+./bin/TiskinTester 33554432 16 -s 100 > TiskinTester/06.16_2.25/results_16
+sleep 5
 
-echo "Running testRun_256_23"
-ELEMENTS=$(echo '2^23' | bc)
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 256 10 > tiskin_testsResults/testRun_256_23
+echo "Running TiskinTester 32"
+./bin/TiskinTester 33554432 32 -s 100 > TiskinTester/06.16_2.25/results_32
+sleep 5
 
-echo "Running testRun_256_24"
-ELEMENTS=$(echo '2^24' | bc)
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 256 10 > tiskin_testsResults/testRun_256_24
+echo "Running TiskinTester 64"
+./bin/TiskinTester 33554432 64 -s 100 > TiskinTester/06.16_2.25/results_64
+sleep 5
 
-echo "Running testRun_256_26"
-ELEMENTS=$(echo '2^26' | bc)
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 256 10 > tiskin_testsResults/testRun_256_26
+echo "Running TiskinTester 128"
+./bin/TiskinTester 33554432 128 -s 100 > TiskinTester/06.16_2.25/results_128
+sleep 5
 
-echo "Running testRun_256_27"
-ELEMENTS=$(echo '2^27' | bc)
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 256 10 > tiskin_testsResults/testRun_256_27
+echo "Running TiskinTester 256"
+./bin/TiskinTester 33554432 256 -s 100 > TiskinTester/06.16_2.25/results_256
+sleep 5
 
-echo "Running testRun_256_28"
-ELEMENTS=$(echo '2^28' | bc)
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 256 10 > tiskin_testsResults/testRun_256_28
-
-echo "Running testRun_256_29"
-ELEMENTS=$(echo '2^29' | bc)
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 256 10 > tiskin_testsResults/testRun_256_29
-
-echo "Running testRun_256_30"
-ELEMENTS=$(echo '2^30' | bc)
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 256 10 > tiskin_testsResults/testRun_256_30
+echo "Running TiskinTester 512"
+./bin/TiskinTester 33554432 512 -s 100 > TiskinTester/06.16_2.25/results_512
+sleep 5
 
 
 
 
+## 2^30
 
+echo "Running TiskinTester 1"
+./bin/TiskinTester 1073741824 1 -s 100 > TiskinTester/06.16_2.30/results_1
+sleep 5
 
+echo "Running TiskinTester 2"
+./bin/TiskinTester 1073741824 2 -s 100 > TiskinTester/06.16_2.30/results_2
+sleep 5
 
-echo "Running testRun_64_18"
-ELEMENTS=$(echo '2^18' | bc)
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 64 10 > tiskin_testsResults/testRun_64_18
+echo "Running TiskinTester 4"
+./bin/TiskinTester 1073741824 4 -s 100 > TiskinTester/06.16_2.30/results_4
+sleep 5
 
-echo "Running testRun_64_19"
-ELEMENTS=$(echo '2^19' | bc)
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 64 10 > tiskin_testsResults/testRun_64_19
+echo "Running TiskinTester 8"
+./bin/TiskinTester 1073741824 8 -s 100 > TiskinTester/06.16_2.30/results_8
+sleep 5
 
-echo "Running testRun_64_20"
-ELEMENTS=$(echo '2^20' | bc)
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 64 10 > tiskin_testsResults/testRun_64_20
+echo "Running TiskinTester 16"
+./bin/TiskinTester 1073741824 16 -s 100 > TiskinTester/06.16_2.30/results_16
+sleep 5
 
-echo "Running testRun_64_22"
-ELEMENTS=$(echo '2^22' | bc)
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 64 10 > tiskin_testsResults/testRun_64_22
+echo "Running TiskinTester 32"
+./bin/TiskinTester 1073741824 32 -s 100 > TiskinTester/06.16_2.30/results_32
+sleep 5
 
-echo "Running testRun_64_24"
-ELEMENTS=$(echo '2^24' | bc)
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 64 10 > tiskin_testsResults/testRun_64_24
+echo "Running TiskinTester 64"
+./bin/TiskinTester 1073741824 64 -s 100 > TiskinTester/06.16_2.30/results_64
+sleep 5
 
-echo "Running testRun_64_26"
-ELEMENTS=$(echo '2^26' | bc)
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 64 10 > tiskin_testsResults/testRun_64_26
+echo "Running TiskinTester 128"
+./bin/TiskinTester 1073741824 128 -s 100 > TiskinTester/06.16_2.30/results_128
+sleep 5
 
+echo "Running TiskinTester 256"
+./bin/TiskinTester 1073741824 256 -s 100 > TiskinTester/06.16_2.30/results_256
+sleep 5
 
-
-
-ELEMENTS=$(echo '2^28' | bc)
-
-echo "Running testRun_p_32"
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 32 10 > tiskin_testsResults/testRun_p_32
-
-echo "Running testRun_p_64"
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 64 10 > tiskin_testsResults/testRun_p_64
-
-echo "Running testRun_p_128"
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 128 10 > tiskin_testsResults/testRun_p_128
-
-echo "Running testRun_p_256"
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 256 10 > tiskin_testsResults/testRun_p_256
-
-echo "Running testRun_p_512"
-./tests/tiskin_testRunner.sh $ITERATIONS $ELEMENTS 512 10 > tiskin_testsResults/testRun_p_512
+echo "Running TiskinTester 512"
+./bin/TiskinTester 1073741824 512 -s 100 > TiskinTester/06.16_2.30/results_512
