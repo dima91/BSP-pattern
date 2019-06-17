@@ -4,7 +4,6 @@
  * \author Luca Di Mauro
  */
 
-
 #ifndef BSP_HPP
 #define BSP_HPP
 
@@ -15,6 +14,7 @@
 #include <vector>
 
 
+/* Class which represents an instance of a BSP computation */
 template <typename T>
 class BSP {
 public:
@@ -28,8 +28,8 @@ private:
 	void setupWorkers (bool setAffinity);
 	void swapVectors (std::vector<std::vector<T>> &a, std::vector<LockableVector<T>> &b);
 
-	const int NEXT_STEP_FLAG	= -2;			// Going to next step during computation
-	const int EOC_FLAG			= -1;			// End of computation
+	const int NEXT_STEP_FLAG	= -2;			// Flag to go to next step during computation
+	const int EOC_FLAG			= -1;			// Flag which identifis the end of computation
 
 
 public:
@@ -52,7 +52,9 @@ public:
 
 
 template<typename T>
-BSP<T>::BSP () {}
+BSP<T>::BSP () {
+	// Do nothing
+}
 
 
 
@@ -76,6 +78,7 @@ uint BSP<T>::addSuperstep (SuperstepPointer step) {
 
 
 
+/* Method to setup workers used during pattern computation */
 template<typename T>
 void BSP<T>::setupWorkers (bool setAffinity) {
 	uint maxActivities	= 0;
@@ -98,6 +101,8 @@ void BSP<T>::setupWorkers (bool setAffinity) {
 
 
 
+/* This method is used during supersteps computation to swap vectors contained in 'a' vector with vectors contained in 'b' vector
+ */
 template<typename T>
 void BSP<T>::swapVectors (std::vector<std::vector<T>> &a, std::vector<LockableVector<T>> &b) {
 	int aSize	= a.size ();
@@ -126,6 +131,8 @@ void BSP<T>::swapVectors (std::vector<std::vector<T>> &a, std::vector<LockableVe
 
 
 
+/* Main method of BSP class which actually realizes pattern computation: it executes supersteps taking into account value 
+ * returned at the end of each superstep computation and handling their input and output vectors */
 template<typename T>
 void BSP<T>::runAndWait (std::vector<std::vector<T>> &input, std::vector<std::vector<T>> &output, bool setAffinity) {
 	int retVal		= 0;
@@ -142,22 +149,23 @@ void BSP<T>::runAndWait (std::vector<std::vector<T>> &input, std::vector<std::ve
 		{
 			UTimer timer ("Superstep " + std::to_string (nextStep));
 			std::cout << "\n\nRunning superstep  " << nextStep << std::endl;
+
 			retVal	= supersteps[nextStep]->runStep (workers, input, lockableVectors);
 
 			// Swapping vectors
 			if (retVal == NEXT_STEP_FLAG) {
 				nextStep++;
-				swapVectors (input, lockableVectors);
 			}
 			else if (retVal == EOC_FLAG) {
-				swapVectors (input, lockableVectors);
+				// Do nothing
 			}
 			else if (retVal>=0) {
 				nextStep	= retVal;
-				swapVectors (input, lockableVectors);
 			}
 			else
 				throw std::runtime_error ("Wrong number of superstep returned by 'atExit' function");
+
+			swapVectors (input, lockableVectors);
 		}
 	}
 
