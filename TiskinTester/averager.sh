@@ -5,6 +5,7 @@ ITERATIONS=5
 
 echo -e "Averaging completion time for $FILE"
 
+rm wholeTimes seddedTimes
 
 cat $FILE | grep Whole > wholeTimes
 sed -e 's/.*usec  (\([0-9]\+\).*/\1/' wholeTimes > seddedTimes
