@@ -9,7 +9,6 @@
 
 UTimer::UTimer (const std::string m) : message(m) {
 	start		= std::chrono::high_resolution_clock::now();
-	outputMutex	= nullptr;
 }
 
 

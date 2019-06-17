@@ -4,12 +4,12 @@
  * \author Luca Di Mauro
  */
 
+#ifndef U_TIMER_HPP
+#define U_TIMER_HPP
+
 #include <iostream>
 #include <chrono>
 #include <mutex>
-
-#ifndef U_TIMER_HPP
-#define U_TIMER_HPP
 
 
 /* Class which allows to keep track of elapsed time between creation of an object instance of this class and its destruction,
@@ -25,17 +25,13 @@ private:
 	TimePoint stop;
 	std::chrono::duration<double> elapsedTime;
 	std::string message;
-
-	static std::mutex *outputMutex;
-
+	
 
 public:
 	UTimer (const std::string m);
 
 	~UTimer ();
 };
-
-std::mutex *UTimer::outputMutex;
 
 
 #endif // U_TIMER_HPP
