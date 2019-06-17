@@ -4,7 +4,6 @@
  * \author Luca Di Mauro
  */
 
-
 #ifndef LOCAKBLE_VECTOR_HPP
 #define LOCAKBLE_VECTOR_HPP
 
@@ -18,6 +17,9 @@ class LockableVector;
 
 
 
+/* Class which represent an already locked vector owned by related 'LockableVector' class instance.
+ * In the destructor, original vector is released.
+ */
 template<typename T>
 class LockedVector {
 private :
@@ -33,6 +35,9 @@ public :
 
 
 
+/* Class which stores a vector of type T and allows to get it either in a shared environment using synchronization mechanisms,
+ * or obtaining it without synchronization.
+ */
 template <typename T>
 class LockableVector {
 private:

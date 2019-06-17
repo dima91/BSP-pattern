@@ -4,7 +4,6 @@
  * \author Luca Di Mauro
  */
 
-
 #include <bsp.hpp>
 #include <uTimer.hpp>
 
@@ -44,10 +43,9 @@ std::mutex mapMutex;
 
 
 
+/* Function to parse command line arguments: it returns a tuple containing the number of elements to be ordered, the number of
+ * parallel executors, the seed to be used during vector shuffling and if the affinity of parallel executors should be setted */
 bool parseArgs (int argn, char **argv, Parameters &params) {
-	//           0        1  2  3  4  5
-	// ./tiskinAlgorithm 256 8 -s 10 -a
-	// ./tiskinAlgorithm 256 8 -a -s 10
 	if (argn < 3 || argn > 6) {
 		return false;
 	}
@@ -106,6 +104,7 @@ bool parseArgs (int argn, char **argv, Parameters &params) {
 
 
 
+/* Function to create a ranndom vector */
 void createRandomVector (IntVector &input, int seed) {
 	uint idx	= 0;
 	std::iota (input.begin(), input.end(), idx++);
@@ -117,44 +116,7 @@ void createRandomVector (IntVector &input, int seed) {
 
 
 
-/*void createRandomVector (IntVector &input, int seed) {
-	uint idx	= 0;
-	std::iota (input.begin(), input.end(), idx++);
-	std::mt19937 mt (seed);
-	std::uniform_int_distribution<int> dist (1, input.size()*10);
-
-	for (auto i=0; i<input.size(); i++) {
-		auto j		= dist(mt)%input.size();
-		auto tmp	= input[j];
-		input[j]	= input[i];
-		input[i]	= tmp;
-	}
-	
-	std::mt19937 engine (seed);
-	std::shuffle (std::begin (input), std::end(input), engine);
-}*/
-
-
-
-
-/* FIXME PIÙ LENTO MA PIÙ CORRETTO
-void createRandomVector (IntVector &input, int seed) {
-    std::mt19937 mt (seed);
-	std::uniform_int_distribution<int> dist (1, input.size()*10);
-	int nextInt	= 0;
-
-	for (size_t i=0; i<input.size(); i++) {
-		do {
-			nextInt	= dist(mt);
-		} while (std::find(input.begin(), input.end(), nextInt) != input.end());
-		input[i]	= nextInt;
-	}
-}*/
-
-
-
-
-
+/* Function to take n elements equally spaced from 'source' vector and to put them into 'taret' vector */
 void findOutSeparators (IntVector &target, IntVector &source, uint n) {
 	auto it		= source.begin ();
 	uint size1	= source.size ()-1;		// Number of elements to be taken into account (belonging to vector)
@@ -183,6 +145,7 @@ void findOutSeparators (IntVector &target, IntVector &source, uint n) {
 
 
 
+/* Function to setup the BSP object with activities and supersteps to execute the Tiskin algorithm */
 void setupBsp (BSP<int> &tAlg, uint n, uint p, int seed, IntVector &input,
 				std::vector<IntVector> &bspInputs, std::vector<IntVector> &bspOutputs) {
 	
@@ -231,7 +194,6 @@ void setupBsp (BSP<int> &tAlg, uint n, uint p, int seed, IntVector &input,
 				mapMutex.unlock ();
 			},
 			[p] (uint activityIndex, IntVector &elements) {
-				//TISKIN_PRINT_V ("Input vector of activity " << activityIndex << ": ", actInput, "");
 				IntCommunicationProtocols cp (p);
 				cp[0]	= IntVector (p+1);
 				findOutSeparators (std::ref(cp[0]), std::ref(elements), p+1);
@@ -260,7 +222,6 @@ void setupBsp (BSP<int> &tAlg, uint n, uint p, int seed, IntVector &input,
 				std::sort (actInput.begin(), actInput.end());
 			},
 			([p] (uint activityIndex, IntVector &commElements) {
-				//TISKIN_PRINT_V ("Input vector of activity " << activityIndex << ": ", actInput, "");
 				std::vector<IntVector> cp (p);
 				IntVector separators (p+1);
 				findOutSeparators (std::ref(separators), std::ref(commElements), p+1);

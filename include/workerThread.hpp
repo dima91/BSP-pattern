@@ -4,7 +4,6 @@
  * \author Luca Di Mauro
  */
 
-
 #ifndef WORKER_THREAD_HPP
 #define WORKER_THREAD_HPP
 
@@ -19,6 +18,7 @@
 
 
 
+/* Class which allows to run in parallel a computation and can be assigned to a specific CPU's core */
 class WorkerThread {
 public:
 	// Defines the type of accepted tasks

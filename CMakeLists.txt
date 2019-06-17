@@ -14,7 +14,7 @@ set (EXECUTABLE_OUTPUT_PATH bin)
 include_directories  (include)
 
 ## Creating .o files
-set				(SOURCE_FILES src/barrier.cpp src/workerThread.cpp)
+set				(SOURCE_FILES src/barrier.cpp src/workerThread.cpp src/uTimer.cpp)
 add_library		(${PROJECT_NAME}_objs OBJECT ${SOURCE_FILES})
 
 ## Creating static library
@@ -25,6 +25,7 @@ add_library		(${PROJECT_NAME} STATIC $<TARGET_OBJECTS:${PROJECT_NAME}_objs>)
 add_executable				(TiskinAlgorithm src/tiskin.cpp)
 target_link_libraries		(TiskinAlgorithm ${PROJECT_NAME})
 
+# Creating BspTester executable
 add_executable			(BspTester	tests/bspTester.cpp)
 target_link_libraries	(BspTester	${PROJECT_NAME})
 

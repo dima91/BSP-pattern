@@ -7,4 +7,4 @@ TESTS_FILES="tests/bspTester.cpp"
 
 rm $ARCHIVE_NAME.zip
 
-zip -T $ARCHIVE_NAME CMakeLists.txt ../SPM_report.pdf $INCLUDE_FILES $SOURCE_FILES $TESTS_FILES
+zip -T $ARCHIVE_NAME CMakeLists.txt $INCLUDE_FILES $SOURCE_FILES $TESTS_FILES

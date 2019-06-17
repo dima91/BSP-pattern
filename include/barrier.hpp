@@ -4,7 +4,6 @@
  * \author Luca Di Mauro
  */
 
-
 #ifndef BARRIER_HPP
 #define BARRIER_HPP
 
@@ -14,6 +13,9 @@
 
 
 
+/* This class represents a barrier on which activities can suspend themselves until
+ * condition 'activitiesNumber' reaches value 0.
+ */
 class Barrier {
 private:
 	std::atomic_int	activitiesNumber;
@@ -26,10 +28,18 @@ public:
 	Barrier (int activitiesNumber);
 	~Barrier ();
 
+	/* Method to decrease barrier of 1 and waiting other activities completion if there are running activities,
+	 * waking up them otherwise
+	 */
 	void decreaseBarrier ();
-	void reset (int activitiesNumber);
+
+	/* Method to wait until all the activities has finished their computation, namely until 'activitiesNumber' variable
+	 * differs from 0
+	 */
 	void waitForFinish ();
+
 	int getRemainingEntities ();
+	void reset (int activitiesNumber);
 };
 
 

@@ -1,3 +1,8 @@
+/**
+ * \file bspTester.cpp
+ * \brief Main file containing two tests of BSP class.
+ * \author Luca Di Mauro
+ */
 
 #include <bsp.hpp>
 #include <uTimer.hpp>
@@ -49,6 +54,9 @@ int main (int argn, char **argv) {
 
 
 
+/* This function creates and executes a BSP object which contains three supersteps and register the 'atExit' function for
+ * the second superstep which implies the exit from computation without execute the third superstep
+ */
 void testAtExitFunction () {
 
 	BSP<int> bspPattern;
@@ -91,6 +99,7 @@ void testAtExitFunction () {
 		s1->addActivity (bFun, bComFun);
 	}
 
+
 	/* Creating a third activity which wll never executed */
 	auto compFun	= IntActivityFunction ([] (int actIdx, std::vector<int> &inputs) {
 		std::cout << "This computation function will not be executed\n";
@@ -120,19 +129,7 @@ void testAtExitFunction () {
 	inputVectors[1].push_back (3);
 	inputVectors[1].push_back (4);
 
-	/*std::cout << "Input vectors..\n";
-	for (size_t i=0; i<inputVectors.size(); i++) {
-		BSP_PRINT_V (i << " >  ", inputVectors[i], "")
-	}*/
-
 	bspPattern.runAndWait (inputVectors, outputVectors, false);
-
-
-
-	/*std::cout << "\n\nOutput vectors..\n";
-	for (size_t i=0; i<outputVectors.size(); i++) {
-		BSP_PRINT_V (i << " >  ", outputVectors[i], "")
-	}*/
 }
 
 
@@ -142,6 +139,10 @@ void testAtExitFunction () {
 
 
 
+/* Thsi function creates and executes a BSP object which contains thre supersteps: the first one containing three activities,
+ * the second one containing four activities and the third one containing one activity. It tests the possibility to create
+ * supersteps with different numbers of activities inside the same BSP object
+ */
 void testDifferentNumber () {
 	std::vector<int> input (20);
 	std::vector<std::vector<int>> bspInputs, bspOutputs;

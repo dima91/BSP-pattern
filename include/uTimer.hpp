@@ -1,12 +1,20 @@
+/**
+ * \file uTimer.hpp
+ * \brief Header file for UTimer class
+ * \author Luca Di Mauro
+ */
+
 #include <iostream>
-#include <string>
 #include <chrono>
-#include <ctime>
+#include <mutex>
 
 #ifndef U_TIMER_HPP
 #define U_TIMER_HPP
 
 
+/* Class which allows to keep track of elapsed time between creation of an object instance of this class and its destruction,
+ * printing out a message registered during creation of object
+ */
 class UTimer {
 private:
 	using usecs		= std::chrono::microseconds;
@@ -22,19 +30,9 @@ private:
 
 
 public:
-	UTimer (const std::string m) : message(m) {
-		start		= std::chrono::high_resolution_clock::now();
-		outputMutex	= nullptr;
-	}
+	UTimer (const std::string m);
 
-	~UTimer () {
-		stop		= std::chrono::high_resolution_clock::now();
-		elapsedTime	= stop - start;
-		auto usec	= std::chrono::duration_cast<usecs>(elapsedTime).count();
-		auto msec	= std::chrono::duration_cast<msecs>(elapsedTime).count();
-		
-		std::cout << message << " computed in " << usec << " usec  (" << msec << " milliseconds)" << std::endl;
-	}
+	~UTimer ();
 };
 
 std::mutex *UTimer::outputMutex;
