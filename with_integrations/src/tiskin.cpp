@@ -359,7 +359,7 @@ int main (int argn, char **argv) {
 
 
 	#ifdef COMPUTE_BARRIER_OVERHEAD
-		std::cout << "Barriers overhead:\t" << tiskinAlgorithm.getTimeStats () << " usecs\n";
+		std::cout << "Final result:\t" << tiskinAlgorithm.getTimeStats () << " usecs\n";
 	#endif
 
 	std::cout << std::endl ;
