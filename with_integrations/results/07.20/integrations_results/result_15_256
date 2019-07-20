@@ -1,0 +1,190 @@
+Using a vector of   size 32768   and   256 processors,   with   seed=100   and   affinity=0
+
+
+======================
+Setting up environment
+Creating random vector computed in 3148 usec  (3 milliseconds)
+Creating BSP input vectors computed in 360 usec  (0 milliseconds)
+Creating supersteps computed in 726 usec  (0 milliseconds)
+Environment setup computed in 4597 usec  (4 milliseconds)
+
+====================
+Starting computation
+
+
+Running superstep  0
+Computation phase	COMP: 3652   BAR: 14850
+Communication phase	COMM: 1957098   BAR: 516256
+Res:  -11198
+Superstep 0 computed in 2008192 usec  (2008 milliseconds)
+
+
+Running superstep  1
+Computation phase	COMP: 20078   BAR: 39240
+Communication phase	COMM: 596   BAR: 24876
+Res:  -19162
+Superstep 1 computed in 73169 usec  (73 milliseconds)
+
+
+Running superstep  2
+Computation phase	COMP: 87   BAR: 54791
+Communication phase	COMM: 189   BAR: 23461
+Res:  -54704
+Superstep 2 computed in 95046 usec  (95 milliseconds)
+
+
+Whole algorithm computed in 2202502 usec  (2202 milliseconds)
+Check of effectively sorted vector computed in 338 usec  (0 milliseconds)
+
+Using a vector of   size 32768   and   256 processors,   with   seed=100   and   affinity=0
+
+
+======================
+Setting up environment
+Creating random vector computed in 4476 usec  (4 milliseconds)
+Creating BSP input vectors computed in 467 usec  (0 milliseconds)
+Creating supersteps computed in 883 usec  (0 milliseconds)
+Environment setup computed in 6249 usec  (6 milliseconds)
+
+====================
+Starting computation
+
+
+Running superstep  0
+Computation phase	COMP: 6070   BAR: 25815
+Communication phase	COMM: 1757114   BAR: 387942
+Res:  -19745
+Superstep 0 computed in 1815533 usec  (1815 milliseconds)
+
+
+Running superstep  1
+Computation phase	COMP: 15781   BAR: 40009
+Communication phase	COMM: 697   BAR: 151
+Res:  -24228
+Superstep 1 computed in 63775 usec  (63 milliseconds)
+
+
+Running superstep  2
+Computation phase	COMP: 84   BAR: 44119
+Communication phase	COMM: 207   BAR: 39922
+Res:  -44035
+Superstep 2 computed in 84766 usec  (84 milliseconds)
+
+
+Whole algorithm computed in 1991980 usec  (1991 milliseconds)
+Check of effectively sorted vector computed in 333 usec  (0 milliseconds)
+
+Using a vector of   size 32768   and   256 processors,   with   seed=100   and   affinity=0
+
+
+======================
+Setting up environment
+Creating random vector computed in 4493 usec  (4 milliseconds)
+Creating BSP input vectors computed in 481 usec  (0 milliseconds)
+Creating supersteps computed in 864 usec  (0 milliseconds)
+Environment setup computed in 6254 usec  (6 milliseconds)
+
+====================
+Starting computation
+
+
+Running superstep  0
+Computation phase	COMP: 3489   BAR: 23608
+Communication phase	COMM: 1853858   BAR: 252783
+Res:  -20119
+Superstep 0 computed in 1919379 usec  (1919 milliseconds)
+
+
+Running superstep  1
+Computation phase	COMP: 21077   BAR: 34498
+Communication phase	COMM: 593   BAR: 21374
+Res:  -13421
+Superstep 1 computed in 46644 usec  (46 milliseconds)
+
+
+Running superstep  2
+Computation phase	COMP: 79   BAR: 45369
+Communication phase	COMM: 212   BAR: 33602
+Res:  -45290
+Superstep 2 computed in 79558 usec  (79 milliseconds)
+
+
+Whole algorithm computed in 2075455 usec  (2075 milliseconds)
+Check of effectively sorted vector computed in 326 usec  (0 milliseconds)
+
+Using a vector of   size 32768   and   256 processors,   with   seed=100   and   affinity=0
+
+
+======================
+Setting up environment
+Creating random vector computed in 4436 usec  (4 milliseconds)
+Creating BSP input vectors computed in 461 usec  (0 milliseconds)
+Creating supersteps computed in 900 usec  (0 milliseconds)
+Environment setup computed in 6207 usec  (6 milliseconds)
+
+====================
+Starting computation
+
+
+Running superstep  0
+Computation phase	COMP: 5635   BAR: 22372
+Communication phase	COMM: 1792934   BAR: 407023
+Res:  -16737
+Superstep 0 computed in 1852091 usec  (1852 milliseconds)
+
+
+Running superstep  1
+Computation phase	COMP: 13116   BAR: 41599
+Communication phase	COMM: 590   BAR: 21099
+Res:  -28483
+Superstep 1 computed in 65012 usec  (65 milliseconds)
+
+
+Running superstep  2
+Computation phase	COMP: 129   BAR: 38429
+Communication phase	COMM: 210   BAR: 37180
+Res:  -38300
+Superstep 2 computed in 76467 usec  (76 milliseconds)
+
+
+Whole algorithm computed in 2023908 usec  (2023 milliseconds)
+Check of effectively sorted vector computed in 366 usec  (0 milliseconds)
+
+Using a vector of   size 32768   and   256 processors,   with   seed=100   and   affinity=0
+
+
+======================
+Setting up environment
+Creating random vector computed in 4467 usec  (4 milliseconds)
+Creating BSP input vectors computed in 481 usec  (0 milliseconds)
+Creating supersteps computed in 866 usec  (0 milliseconds)
+Environment setup computed in 6307 usec  (6 milliseconds)
+
+====================
+Starting computation
+
+
+Running superstep  0
+Computation phase	COMP: 1107   BAR: 19618
+Communication phase	COMM: 1711330   BAR: 547432
+Res:  -18511
+Superstep 0 computed in 1755903 usec  (1755 milliseconds)
+
+
+Running superstep  1
+Computation phase	COMP: 14033   BAR: 23022
+Communication phase	COMM: 701   BAR: 40118
+Res:  -8989
+Superstep 1 computed in 112516 usec  (112 milliseconds)
+
+
+Running superstep  2
+Computation phase	COMP: 82   BAR: 33557
+Communication phase	COMM: 257   BAR: 33352
+Res:  -33475
+Superstep 2 computed in 103988 usec  (103 milliseconds)
+
+
+Whole algorithm computed in 2007849 usec  (2007 milliseconds)
+Check of effectively sorted vector computed in 102 usec  (0 milliseconds)
+
