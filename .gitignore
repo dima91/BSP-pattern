@@ -19,6 +19,7 @@ Makefile
 cmake_install.cmake
 
 *.zip
+.vscode
 mTimes
 msTimes
 seddedMTimes
