@@ -339,7 +339,6 @@ int main (int argn, char **argv) {
 		orderedVector.insert (orderedVector.end(), out.begin(), out.end());
 	}
 	TISKIN_PRINT_V ("Algorithm's output vector:\n", orderedVector, "\n");
-	
 
 	{
 		UTimer timer ("Check of effectively sorted vector");
@@ -356,6 +355,11 @@ int main (int argn, char **argv) {
 		UTimer cppTimer ("C++ sort algorithm");
 		std::sort (cppUnorderedVector.begin(), cppUnorderedVector.end());
 	}
+	#endif
+
+
+	#ifdef COMPUTE_BARRIER_OVERHEAD
+		std::cout << "Barriers overhead:\t" << tiskinAlgorithm.getTimeStats () << " usecs\n";
 	#endif
 
 	std::cout << std::endl ;

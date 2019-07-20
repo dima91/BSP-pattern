@@ -40,6 +40,8 @@ public:
 	uint addSuperstep (SuperstepPointer step);
 
 	void runAndWait (std::vector<std::vector<T>> &input, std::vector<std::vector<T>> &ouput, bool setAffinity);
+
+	int getTimeStats ();
 };
 
 
@@ -175,6 +177,20 @@ void BSP<T>::runAndWait (std::vector<std::vector<T>> &input, std::vector<std::ve
 	std::for_each (workers.begin(), workers.end(), [] (WorkerThread &w) {
 		w.stopWorker ();
 	});
+}
+
+
+
+
+template<typename T>
+int BSP<T>::getTimeStats () {
+	int stats	= 0;
+
+	for (auto s : supersteps) {
+		stats	= stats + s->getBarriersOverhead ();
+	}
+
+	return stats;
 }
 
 
