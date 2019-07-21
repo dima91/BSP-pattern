@@ -1,0 +1,180 @@
+Using a vector of   size 33554432   and   8 processors,   with   seed=100   and   affinity=0
+
+
+======================
+Setting up environment
+Creating random vector computed in 8396776 usec  (8396 milliseconds)
+Creating BSP input vectors computed in 204609 usec  (204 milliseconds)
+Creating supersteps computed in 95 usec  (0 milliseconds)
+Environment setup computed in 8697131 usec  (8697 milliseconds)
+
+====================
+Starting computation
+
+
+Running superstep  0
+There are 8 workers
+Intermediate result:  939834 usecs
+Superstep 0 computed in 1009512 usec  (1009 milliseconds)
+
+
+Running superstep  1
+There are 8 workers
+Intermediate result:  150995 usecs
+Superstep 1 computed in 176187 usec  (176 milliseconds)
+
+
+Running superstep  2
+There are 8 workers
+Intermediate result:  578669 usecs
+Superstep 2 computed in 604941 usec  (604 milliseconds)
+
+
+Whole algorithm computed in 1796585 usec  (1796 milliseconds)
+Check of effectively sorted vector computed in 98191 usec  (98 milliseconds)
+Barriers overhead:	1414512 usecs
+
+Using a vector of   size 33554432   and   8 processors,   with   seed=100   and   affinity=0
+
+
+======================
+Setting up environment
+Creating random vector computed in 8388639 usec  (8388 milliseconds)
+Creating BSP input vectors computed in 205574 usec  (205 milliseconds)
+Creating supersteps computed in 143 usec  (0 milliseconds)
+Environment setup computed in 8699616 usec  (8699 milliseconds)
+
+====================
+Starting computation
+
+
+Running superstep  0
+There are 8 workers
+Intermediate result:  944976 usecs
+Superstep 0 computed in 1004925 usec  (1004 milliseconds)
+
+
+Running superstep  1
+There are 8 workers
+Intermediate result:  152131 usecs
+Superstep 1 computed in 178014 usec  (178 milliseconds)
+
+
+Running superstep  2
+There are 8 workers
+Intermediate result:  581266 usecs
+Superstep 2 computed in 658218 usec  (658 milliseconds)
+
+
+Whole algorithm computed in 1847322 usec  (1847 milliseconds)
+Check of effectively sorted vector computed in 98104 usec  (98 milliseconds)
+Barriers overhead:	1373866 usecs
+
+Using a vector of   size 33554432   and   8 processors,   with   seed=100   and   affinity=0
+
+
+======================
+Setting up environment
+Creating random vector computed in 8389666 usec  (8389 milliseconds)
+Creating BSP input vectors computed in 204753 usec  (204 milliseconds)
+Creating supersteps computed in 94 usec  (0 milliseconds)
+Environment setup computed in 8699812 usec  (8699 milliseconds)
+
+====================
+Starting computation
+
+
+Running superstep  0
+There are 8 workers
+Intermediate result:  945397 usecs
+Superstep 0 computed in 1010701 usec  (1010 milliseconds)
+
+
+Running superstep  1
+There are 8 workers
+Intermediate result:  147902 usecs
+Superstep 1 computed in 173538 usec  (173 milliseconds)
+
+
+Running superstep  2
+There are 8 workers
+Intermediate result:  564571 usecs
+Superstep 2 computed in 632341 usec  (632 milliseconds)
+
+
+Whole algorithm computed in 1823546 usec  (1823 milliseconds)
+Check of effectively sorted vector computed in 99628 usec  (99 milliseconds)
+Barriers overhead:	1414700 usecs
+
+Using a vector of   size 33554432   and   8 processors,   with   seed=100   and   affinity=0
+
+
+======================
+Setting up environment
+Creating random vector computed in 8349519 usec  (8349 milliseconds)
+Creating BSP input vectors computed in 205625 usec  (205 milliseconds)
+Creating supersteps computed in 91 usec  (0 milliseconds)
+Environment setup computed in 8659868 usec  (8659 milliseconds)
+
+====================
+Starting computation
+
+
+Running superstep  0
+There are 8 workers
+Intermediate result:  851747 usecs
+Superstep 0 computed in 981421 usec  (981 milliseconds)
+
+
+Running superstep  1
+There are 8 workers
+Intermediate result:  148212 usecs
+Superstep 1 computed in 161370 usec  (161 milliseconds)
+
+
+Running superstep  2
+There are 8 workers
+Intermediate result:  578662 usecs
+Superstep 2 computed in 646893 usec  (646 milliseconds)
+
+
+Whole algorithm computed in 1796249 usec  (1796 milliseconds)
+Check of effectively sorted vector computed in 103803 usec  (103 milliseconds)
+Barriers overhead:	1439922 usecs
+
+Using a vector of   size 33554432   and   8 processors,   with   seed=100   and   affinity=0
+
+
+======================
+Setting up environment
+Creating random vector computed in 8434577 usec  (8434 milliseconds)
+Creating BSP input vectors computed in 204097 usec  (204 milliseconds)
+Creating supersteps computed in 93 usec  (0 milliseconds)
+Environment setup computed in 8743732 usec  (8743 milliseconds)
+
+====================
+Starting computation
+
+
+Running superstep  0
+There are 8 workers
+Intermediate result:  849026 usecs
+Superstep 0 computed in 984022 usec  (984 milliseconds)
+
+
+Running superstep  1
+There are 8 workers
+Intermediate result:  151496 usecs
+Superstep 1 computed in 164798 usec  (164 milliseconds)
+
+
+Running superstep  2
+There are 8 workers
+Intermediate result:  575556 usecs
+Superstep 2 computed in 633830 usec  (633 milliseconds)
+
+
+Whole algorithm computed in 1789142 usec  (1789 milliseconds)
+Check of effectively sorted vector computed in 98138 usec  (98 milliseconds)
+Barriers overhead:	1428470 usecs
+
