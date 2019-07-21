@@ -87,10 +87,11 @@ private:
 	/* std::atomic<std::pair<std::atomic_int, std::atomic_int>> maxCompT;
 	std::atomic<std::pair<std::atomic_int, std::atomic_int>> maxCommT; */
 	std::mutex maxTimeMutex;
-	int avgCompT_comp;
-	int avgCompT_bar;
-	int avgCommT_comm;
-	int avgCommT_bar;
+	std::atomic_int avgCompT_comp;
+	std::atomic_int avgCompT_bar;
+	std::atomic_int avgCommT_comm;
+	std::atomic_int avgCommT_bar;
+	int timeStat;
 
 
 public:
@@ -105,7 +106,7 @@ public:
 
 	int getActivitiesNumber ();
 	void setAtExitFunction (AtExitFunction atExit);
-	std::pair<int, int> getAvgBarriersOverhead ();
+	int getAvgBarriersOverhead ();
 };
 
 
@@ -127,6 +128,7 @@ Superstep<T>::Superstep () : startBarrier (0), compPhaseBarrier(0), commPhaseBar
 	avgCompT_bar	= 0;
 	avgCommT_comm	= 0;
 	avgCommT_bar	= 0;
+	timeStat		= 0;
 	
 	atExitF	= AtExitFunction ([&] (std::vector<LockableVector<T>> &outputItems) {
 		return NEXT_STEP_FLAG;
@@ -165,8 +167,8 @@ int Superstep<T>::getActivitiesNumber () {
 
 
 template<typename T>
-std::pair<int, int> Superstep<T>::getAvgBarriersOverhead () {
-	return std::make_pair<int, int> (avgCompT_comp+avgCommT_comm, avgCompT_bar+avgCommT_bar);
+int Superstep<T>::getAvgBarriersOverhead () {
+	return timeStat;
 }
 
 
@@ -219,15 +221,19 @@ int Superstep<T>::runStep (std::vector<WorkerThread> &workers,
 	commPhaseBarrier.waitForFinish ();
 
 	BARRIER_OVERHEAD(
-		std::cout << "There are " << activitiesFunctions.size() << " workers\n";
+		//std::cout << "There are " << activitiesFunctions.size() << " workers\n";
 		avgCompT_comp	= avgCompT_comp/activitiesFunctions.size();
 		avgCompT_bar	= avgCompT_bar/activitiesFunctions.size();
 		avgCommT_comm	= avgCommT_comm/activitiesFunctions.size();
 		avgCommT_bar	= avgCommT_bar/activitiesFunctions.size();
+
+		timeStat		= (avgCompT_comp+avgCommT_comm) - (avgCompT_bar+avgCommT_bar);
+
 		/* std::cout << "Averages values:\n";
 		std::cout << "Computation phase\tCOMP: " << avgCompT_comp << "   BAR: " << avgCompT_bar << std::endl;
 		std::cout << "Communication phase\tCOMM: " << avgCommT_comm << "   BAR: " << avgCommT_bar << std::endl; */
-		std::cout << "Intermediate result:  " << avgCompT_comp + avgCommT_comm - avgCompT_bar - avgCommT_bar << " usecs\n";
+
+		std::cout << "Intermediate overhead:  " << timeStat << " usecs\n";
 	)
 	
 	return atExitF (outputVectors);
@@ -255,7 +261,7 @@ void Superstep<T>::workerFunction (int index, std::vector<T> &inputItems, std::v
 	
 	BARRIER_OVERHEAD (
 		auto elapsed	= timer.getElapsedTime<UTimer::usecs>().count();
-		std::unique_lock<std::mutex> lock (maxTimeMutex);
+		//std::unique_lock<std::mutex> lock (maxTimeMutex);
 		avgCompT_comp += elapsed;
 		//maxCompT_comp	= (maxCompT_comp == -1 || maxCompT_comp < elapsed) ? elapsed : maxCompT_comp;
 		/* std::unique_lock<std::mutex> olock (outputMutex);
@@ -271,7 +277,7 @@ void Superstep<T>::workerFunction (int index, std::vector<T> &inputItems, std::v
 	
 	BARRIER_OVERHEAD (
 		auto elapsed	= timer.getElapsedTime<UTimer::usecs>().count();
-		std::unique_lock<std::mutex> lock (maxTimeMutex);
+		//std::unique_lock<std::mutex> lock (maxTimeMutex);
 		avgCompT_bar += elapsed;
 		//maxCompT_bar	= (maxCompT_bar == -1 || maxCompT_bar < elapsed) ? elapsed : maxCompT_bar;
 		/* std::unique_lock<std::mutex> olock (outputMutex);
@@ -338,7 +344,7 @@ void Superstep<T>::workerFunction (int index, std::vector<T> &inputItems, std::v
 
 	BARRIER_OVERHEAD (
 		auto elapsed	= timer.getElapsedTime<UTimer::usecs>().count();
-		std::unique_lock<std::mutex> lock (maxTimeMutex);
+		//std::unique_lock<std::mutex> lock (maxTimeMutex);
 		avgCommT_comm += elapsed;
 		//maxCommT_comm	= (maxCommT_comm == -1 || maxCommT_comm < elapsed) ? elapsed : maxCommT_comm;
 		/* std::unique_lock<std::mutex> olock (outputMutex);
