@@ -105,7 +105,7 @@ public:
 
 	int getActivitiesNumber ();
 	void setAtExitFunction (AtExitFunction atExit);
-	int getBarriersOverhead ();
+	std::pair<int, int> getAvgBarriersOverhead ();
 };
 
 
@@ -165,8 +165,8 @@ int Superstep<T>::getActivitiesNumber () {
 
 
 template<typename T>
-int Superstep<T>::getBarriersOverhead () {
-	return (avgCompT_comp+avgCommT_comm)-(avgCompT_bar+avgCommT_bar);
+std::pair<int, int> Superstep<T>::getAvgBarriersOverhead () {
+	return std::make_pair<int, int> (avgCompT_comp+avgCommT_comm, avgCompT_bar+avgCommT_bar);
 }
 
 

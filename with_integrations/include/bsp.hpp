@@ -41,7 +41,7 @@ public:
 
 	void runAndWait (std::vector<std::vector<T>> &input, std::vector<std::vector<T>> &ouput, bool setAffinity);
 
-	int getTimeStats ();
+	std::pair<int, int> getTimeStats ();
 };
 
 
@@ -183,11 +183,15 @@ void BSP<T>::runAndWait (std::vector<std::vector<T>> &input, std::vector<std::ve
 
 
 template<typename T>
-int BSP<T>::getTimeStats () {
-	int stats	= 0;
+std::pair<int, int> BSP<T>::getTimeStats () {
+	std::pair<int, int> stats;
+	stats.first		= 0;
+	stats.second	= 0;
 
 	for (auto s : supersteps) {
-		stats	= stats + s->getBarriersOverhead ();
+		auto ss			= s->getAvgBarriersOverhead ();
+		stats.first		+= ss.first;
+		stats.second	+= ss.second;
 	}
 
 	return stats;

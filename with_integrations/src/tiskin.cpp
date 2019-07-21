@@ -359,7 +359,9 @@ int main (int argn, char **argv) {
 
 
 	#ifdef COMPUTE_BARRIER_OVERHEAD
-		std::cout << "Final result:\t" << tiskinAlgorithm.getTimeStats () << " usecs\n";
+		auto stats	= tiskinAlgorithm.getTimeStats ();
+		std::cout << "T_c: " << stats.first << ",\tT_b: " << stats.second << std::endl;
+		std::cout << "Final result:\t" << stats.first-stats.second << " usecs\n";
 	#endif
 
 	std::cout << std::endl ;
