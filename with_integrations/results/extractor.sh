@@ -9,7 +9,7 @@ if [ -f tmpValsExtractor ] ; then
 	rm tmpValsExtractor
 fi
 
-grep "overhead" $1 | grep -Eo '[0-9\.]+' > tmpValsExtractor
+grep "Final res" $1 | grep -Eo '[0-9\.]+' > tmpValsExtractor
 SUM=$(awk '{ sum += $1 } END { print sum }' tmpValsExtractor )
 
 echo $SUM

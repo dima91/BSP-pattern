@@ -221,17 +221,12 @@ int Superstep<T>::runStep (std::vector<WorkerThread> &workers,
 	commPhaseBarrier.waitForFinish ();
 
 	BARRIER_OVERHEAD(
-		//std::cout << "There are " << activitiesFunctions.size() << " workers\n";
 		avgCompT_comp	= avgCompT_comp/activitiesFunctions.size();
 		avgCompT_bar	= avgCompT_bar/activitiesFunctions.size();
 		avgCommT_comm	= avgCommT_comm/activitiesFunctions.size();
 		avgCommT_bar	= avgCommT_bar/activitiesFunctions.size();
 
 		timeStat		= (avgCompT_comp+avgCommT_comm) - (avgCompT_bar+avgCommT_bar);
-
-		/* std::cout << "Averages values:\n";
-		std::cout << "Computation phase\tCOMP: " << avgCompT_comp << "   BAR: " << avgCompT_bar << std::endl;
-		std::cout << "Communication phase\tCOMM: " << avgCommT_comm << "   BAR: " << avgCommT_bar << std::endl; */
 
 		std::cout << "Intermediate overhead:  " << timeStat << " usecs\n";
 	)
@@ -261,11 +256,7 @@ void Superstep<T>::workerFunction (int index, std::vector<T> &inputItems, std::v
 	
 	BARRIER_OVERHEAD (
 		auto elapsed	= timer.getElapsedTime<UTimer::usecs>().count();
-		//std::unique_lock<std::mutex> lock (maxTimeMutex);
 		avgCompT_comp += elapsed;
-		//maxCompT_comp	= (maxCompT_comp == -1 || maxCompT_comp < elapsed) ? elapsed : maxCompT_comp;
-		/* std::unique_lock<std::mutex> olock (outputMutex);
-		std::cout << "Computation time for " << index << ": " << elapsed << " usecs\n"; */
 	})
 
 	
@@ -277,11 +268,7 @@ void Superstep<T>::workerFunction (int index, std::vector<T> &inputItems, std::v
 	
 	BARRIER_OVERHEAD (
 		auto elapsed	= timer.getElapsedTime<UTimer::usecs>().count();
-		//std::unique_lock<std::mutex> lock (maxTimeMutex);
 		avgCompT_bar += elapsed;
-		//maxCompT_bar	= (maxCompT_bar == -1 || maxCompT_bar < elapsed) ? elapsed : maxCompT_bar;
-		/* std::unique_lock<std::mutex> olock (outputMutex);
-		std::cout << "Barrier time for " << index << ": " << elapsed << " usecs\n"; */
 	})
 
 
@@ -344,11 +331,7 @@ void Superstep<T>::workerFunction (int index, std::vector<T> &inputItems, std::v
 
 	BARRIER_OVERHEAD (
 		auto elapsed	= timer.getElapsedTime<UTimer::usecs>().count();
-		//std::unique_lock<std::mutex> lock (maxTimeMutex);
 		avgCommT_comm += elapsed;
-		//maxCommT_comm	= (maxCommT_comm == -1 || maxCommT_comm < elapsed) ? elapsed : maxCommT_comm;
-		/* std::unique_lock<std::mutex> olock (outputMutex);
-		std::cout << "Communication time for " << index << ": " << elapsed << " usecs\n"; */
 	})
 
 	BARRIER_OVERHEAD (
@@ -361,9 +344,6 @@ void Superstep<T>::workerFunction (int index, std::vector<T> &inputItems, std::v
 		auto elapsed	= timer.getElapsedTime<UTimer::usecs>().count();
 		std::unique_lock<std::mutex> lock (maxTimeMutex);
 		avgCommT_bar += elapsed;
-		//maxCommT_bar	= (maxCommT_bar == -1 || maxCommT_bar < elapsed) ? elapsed : maxCommT_bar;
-		/* std::unique_lock<std::mutex> olock (outputMutex);
-		std::cout << "Barrier time for " << index << ": " << elapsed << " usecs\n"; */
 	})
 }
 
